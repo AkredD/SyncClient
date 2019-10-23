@@ -7,16 +7,24 @@
     <groupId>com.cross.sync</groupId>
     <artifactId>SyncClient</artifactId>
     <version>1.0</version>
+    <properties>
+        <slf4jVersion>1.7.28</slf4jVersion>
+    </properties>
     <dependencies>
         <dependency>
-            <groupId>com.hierynomus</groupId>
-            <artifactId>sshj</artifactId>
-            <version>0.27.0</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4jVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.28</version>
+            <version>${slf4jVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hierynomus</groupId>
+            <artifactId>sshj</artifactId>
+            <version>0.27.0</version>
         </dependency>
 
     </dependencies>

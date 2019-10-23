@@ -47,6 +47,7 @@ public interface LinuxProvider {
 
     /**
      * Create file
+     *
      * @param path path to file
      * @throws ProviderException provider exception
      */
@@ -55,7 +56,7 @@ public interface LinuxProvider {
     /**
      * Delete file
      *
-     * @param path - path to file
+     * @param path path to file
      * @throws ProviderException provider exception
      */
     void deleteFile(String path) throws ProviderException;
@@ -64,8 +65,18 @@ public interface LinuxProvider {
      * Move file `from` to `to`
      *
      * @param from from path to file
-     * @param to to path to file
+     * @param to   to path to file
      * @throws ProviderException provider exception
      */
     void moveFile(String from, String to) throws ProviderException;
+
+
+    /**
+     * Check file existence
+     *
+     * @param path path to file
+     * @return true if exist and false otherwise
+     * @throws ProviderException provider exception
+     */
+    Boolean existFile(String path) throws ProviderException;
 }

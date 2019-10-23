@@ -10,21 +10,14 @@ import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.sftp.OpenMode;
 import net.schmizz.sshj.sftp.RemoteFile;
-import net.schmizz.sshj.sftp.SFTPException;
-import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class SSHProvider implements Closeable, LinuxProvider {
-    private String host;
-    private String publicKey;
-    private SSHClient ssh;
     private final static Set<OpenMode> READ_MODE;
     private final static Set<OpenMode> WRITE_MODE;
 
@@ -34,6 +27,10 @@ public class SSHProvider implements Closeable, LinuxProvider {
         READ_MODE.add(OpenMode.READ);
         WRITE_MODE.add(OpenMode.WRITE);
     }
+
+    private String host;
+    private String publicKey;
+    private SSHClient ssh;
 
     public SSHProvider(String host, String publicKey) {
         this.host = host;
@@ -69,7 +66,7 @@ public class SSHProvider implements Closeable, LinuxProvider {
             try (Session session = ssh.startSession()) {
                 final Session.Command cmd = session.exec("echo '' > " + path);
             }
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new SSHProviderException(e);
         }
     }
@@ -80,7 +77,7 @@ public class SSHProvider implements Closeable, LinuxProvider {
             try (Session session = ssh.startSession()) {
                 final Session.Command cmd = session.exec("rm " + path);
             }
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new SSHProviderException(e);
         }
     }
@@ -91,7 +88,7 @@ public class SSHProvider implements Closeable, LinuxProvider {
             try (Session session = ssh.startSession()) {
                 final Session.Command cmd = session.exec("mv " + from + " " + to);
             }
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new SSHProviderException(e);
         }
     }
@@ -103,7 +100,8 @@ public class SSHProvider implements Closeable, LinuxProvider {
         try {
             session = ssh.startSession();
             final Session.Command cmd = session.exec("md5sum " + path);
-            result = IOUtils.readFully(cmd.getInputStream()).toString().split(" ")[0];
+            String answer = IOUtils.readFully(cmd.getInputStream()).toString();
+            result = (answer == null || answer.isBlank()) ? ((Double) new Random().nextDouble()).toString() : answer.split(" ")[0];
         } catch (IOException e) {
             throw new SSHProviderException(e);
         } finally {
@@ -139,5 +137,16 @@ public class SSHProvider implements Closeable, LinuxProvider {
     @Override
     public void close() throws IOException {
         ssh.disconnect();
+    }
+
+    @Override
+    public Boolean existFile(String path) {
+        try (Session session = ssh.startSession()) {
+            final Session.Command cmd = session.exec("test -f ./" + path + " && echo \"Found\" || echo \"Not Found\"");
+            String answer = IOUtils.readFully(cmd.getInputStream()).toString();
+            return answer.equals("Found");
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

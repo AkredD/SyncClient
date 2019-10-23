@@ -2,7 +2,9 @@ package com.cross.sync.util;
 
 import net.schmizz.sshj.sftp.RemoteFile;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Objects;
 
 public class RemoteInputStream extends ByteArrayInputStream {
@@ -46,7 +48,7 @@ public class RemoteInputStream extends ByteArrayInputStream {
                 if (len <= 0) {
                     return 0;
                 } else {
-                    rf.read((long) super.pos, b, off, len);
+                    rf.read(super.pos, b, off, len);
                     this.pos += len;
                     return len;
                 }
@@ -63,11 +65,22 @@ public class RemoteInputStream extends ByteArrayInputStream {
 
     @Override
     public int readNBytes(byte[] b, int off, int len) {
-        throw new UnsupportedOperationException();    }
+        throw new UnsupportedOperationException();
+    }
 
     @Override
-    public synchronized long transferTo(OutputStream out) throws IOException {
-        throw new UnsupportedOperationException();    }
+    public synchronized long transferTo(OutputStream out) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public synchronized int available() {
+        try {
+            return (int) rf.fetchAttributes().getSize();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public void close() throws IOException {

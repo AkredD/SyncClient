@@ -5,6 +5,7 @@ import com.cross.sync.exception.ProviderException;
 import com.cross.sync.provider.LinuxProvider;
 
 import java.io.*;
+import java.util.Random;
 
 public class LocalProvider implements LinuxProvider {
     @Override
@@ -46,7 +47,8 @@ public class LocalProvider implements LinuxProvider {
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream()));
-            String result = reader.readLine().split(" ")[0];
+            String answer = reader.readLine();
+            String result = (answer == null || answer.isBlank()) ? ((Double) new Random().nextDouble()).toString() : answer.split(" ")[0];
             int exitVal = process.waitFor();
             if (exitVal != 0) {
                 throw new LocalProviderException(String.format("Can't execute command: {md5sum %s}", path));
@@ -93,5 +95,11 @@ public class LocalProvider implements LinuxProvider {
         } catch (IOException | InterruptedException e) {
             throw new LocalProviderException(e);
         }
+    }
+
+    @Override
+    public Boolean existFile(String path) throws ProviderException {
+        File file = new File(path);
+        return file.exists();
     }
 }
