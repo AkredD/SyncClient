@@ -1,7 +1,6 @@
 package com.cross.sync.transfer.impl;
 
 import com.cross.sync.exception.ProviderException;
-import com.cross.sync.exception.TransferException;
 import com.cross.sync.provider.LinuxProvider;
 import com.cross.sync.transfer.TransferThread;
 import com.cross.sync.util.Slf4fLogger;
@@ -49,7 +48,7 @@ public class FullTempTransfer extends TransferThread {
             Slf4fLogger.info(this, String.format("File from %s by path '%s' synchronized with %s '%s'"
                     , readProvider.getClass().getSimpleName(), readPath
                     , writeProvider.getClass().getSimpleName(), writePath));
-        } catch (ProviderException | TransferException | IOException e) {
+        } catch (ProviderException | IOException e) {
             Slf4fLogger.error(this, e.getMessage());
         }
     }

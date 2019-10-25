@@ -60,7 +60,13 @@ public class RemoteInputStream extends ByteArrayInputStream {
 
     @Override
     public synchronized byte[] readAllBytes() {
-        throw new UnsupportedOperationException();
+        try {
+            byte[] b = new byte[(int) rf.fetchAttributes().getSize()];
+            read(b, 0, (int) rf.fetchAttributes().getSize());
+            return b;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

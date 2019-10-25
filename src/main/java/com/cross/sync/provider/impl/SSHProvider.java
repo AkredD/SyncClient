@@ -12,7 +12,10 @@ import net.schmizz.sshj.sftp.OpenMode;
 import net.schmizz.sshj.sftp.RemoteFile;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -69,25 +72,23 @@ public class SSHProvider implements Closeable, LinuxProvider {
         } catch (IOException e) {
             throw new SSHProviderException(e);
         }
+
     }
 
     @Override
     public void deleteFile(String path) throws SSHProviderException {
-        try {
-            try (Session session = ssh.startSession()) {
-                final Session.Command cmd = session.exec("rm " + path);
-            }
+        try (Session session = ssh.startSession()) {
+            final Session.Command cmd = session.exec("rm " + path);
         } catch (IOException e) {
             throw new SSHProviderException(e);
         }
+
     }
 
     @Override
     public void moveFile(String from, String to) throws ProviderException {
-        try {
-            try (Session session = ssh.startSession()) {
-                final Session.Command cmd = session.exec("mv " + from + " " + to);
-            }
+        try (Session session = ssh.startSession()) {
+            final Session.Command cmd = session.exec("mv " + from + " " + to);
         } catch (IOException e) {
             throw new SSHProviderException(e);
         }
@@ -95,23 +96,13 @@ public class SSHProvider implements Closeable, LinuxProvider {
 
     @Override
     public String getMD5FileHash(String path) throws SSHProviderException {
-        Session session = null;
         String result;
-        try {
-            session = ssh.startSession();
+        try (Session session = ssh.startSession()) {
             final Session.Command cmd = session.exec("md5sum " + path);
             String answer = IOUtils.readFully(cmd.getInputStream()).toString();
             result = (answer == null || answer.isBlank()) ? ((Double) new Random().nextDouble()).toString() : answer.split(" ")[0];
         } catch (IOException e) {
             throw new SSHProviderException(e);
-        } finally {
-            try {
-                if (session != null) {
-                    session.close();
-                }
-            } catch (IOException e) {
-                // Do Nothing
-            }
         }
         return result;
     }
