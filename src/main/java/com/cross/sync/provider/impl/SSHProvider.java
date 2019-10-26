@@ -67,7 +67,7 @@ public class SSHProvider implements Closeable, LinuxProvider {
     public void createFile(String path) throws SSHProviderException {
         try {
             try (Session session = ssh.startSession()) {
-                final Session.Command cmd = session.exec("echo '' > " + path);
+                final Session.Command cmd = session.exec("touch " + path);
             }
         } catch (IOException e) {
             throw new SSHProviderException(e);

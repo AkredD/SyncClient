@@ -2,12 +2,12 @@ package com.cross.sync.transfer.impl;
 
 import com.cross.sync.exception.ProviderException;
 import com.cross.sync.provider.LinuxProvider;
-import com.cross.sync.transfer.TransferThread;
+import com.cross.sync.transfer.Transfer;
 import com.cross.sync.util.Slf4fLogger;
 
 import java.io.IOException;
 
-public class FullTempTransfer extends TransferThread {
+public class FullTempTransfer extends Transfer {
     private LinuxProvider readProvider;
     private LinuxProvider writeProvider;
     private String readPath;
@@ -37,7 +37,7 @@ public class FullTempTransfer extends TransferThread {
             super.transferTo();
             source.close();
             destination.close();
-            if (isInterrupted()) {
+            if (Thread.currentThread().isInterrupted()) {
                 writeProvider.deleteFile(writeTempPath);
                 Slf4fLogger.info(this, String.format("Synchronizing file from %s by path '%s'  with %s '%s' was interrupted"
                         , readProvider.getClass().getSimpleName(), readPath

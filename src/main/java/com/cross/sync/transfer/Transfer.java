@@ -5,8 +5,9 @@ import com.cross.sync.util.Slf4fLogger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.TimerTask;
 
-public abstract class TransferThread extends Thread {
+public abstract class Transfer extends TimerTask {
     protected InputStream source;
     protected OutputStream destination;
     private Integer status;

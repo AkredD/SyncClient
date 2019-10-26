@@ -32,11 +32,10 @@ class LocalProviderTest {
             provider.createFile(testPath);
             File testFile = new File(testPath);
             assertTrue(testFile.exists());
-            createTestFile();
-            assertEquals("af6c12415e94ed70e45dccd3aa4d2931", provider.getMD5FileHash(testPath));
+            assertEquals("d41d8cd98f00b204e9800998ecf8427e", provider.getMD5FileHash(testPath));
             provider.deleteFile(testPath);
             assertFalse(testFile.exists());
-        } catch (IOException | ProviderException e) {
+        } catch (ProviderException e) {
             e.printStackTrace();
             fail();
         }
