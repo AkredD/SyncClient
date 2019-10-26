@@ -6,14 +6,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Objects;
 
 public class RemoteOutputStream extends ByteArrayOutputStream implements Closeable {
     private static final int DEFAULT_BUFFER_SIZE = 8192;
     private final RemoteFile rf;
 
 
-    public RemoteOutputStream(final RemoteFile rf) throws IOException {
+    public RemoteOutputStream(final RemoteFile rf) {
         super(DEFAULT_BUFFER_SIZE);
         this.rf = rf;
         super.count = 0;
@@ -23,7 +22,7 @@ public class RemoteOutputStream extends ByteArrayOutputStream implements Closeab
     public synchronized void write(int b) {
         byte[] byteArray = {(byte) b};
         try {
-            rf.write(count, byteArray, count, 1);
+            rf.write(count, byteArray, 0, 1);
             super.count++;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -33,8 +32,7 @@ public class RemoteOutputStream extends ByteArrayOutputStream implements Closeab
     @Override
     public synchronized void write(byte[] b, int off, int len) {
         try {
-            Objects.checkFromIndexSize(off, len, b.length);
-            rf.write(off, b, off, len);
+            rf.write(off, b, 0, len);
             super.count += len;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -47,7 +45,7 @@ public class RemoteOutputStream extends ByteArrayOutputStream implements Closeab
     }
 
     @Override
-    public synchronized void writeTo(OutputStream out) throws IOException {
+    public synchronized void writeTo(OutputStream out) {
         throw new UnsupportedOperationException();
     }
 

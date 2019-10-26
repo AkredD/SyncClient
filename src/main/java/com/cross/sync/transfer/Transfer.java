@@ -10,7 +10,8 @@ import java.util.TimerTask;
 public abstract class Transfer extends TimerTask {
     protected InputStream source;
     protected OutputStream destination;
-    private Integer status;
+    protected volatile boolean run = false;
+    private volatile Integer status;
 
     public abstract void run();
 
@@ -21,7 +22,7 @@ public abstract class Transfer extends TimerTask {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = source.read(buffer)) != -1) {
-                destination.write(buffer, 0, len);
+                destination.write(buffer, transferedSize, len);
                 transferedSize += len;
                 status = (int) ((((long) transferedSize) * 100L) / ((long) size));
                 if (Thread.currentThread().isInterrupted()) {
@@ -35,5 +36,9 @@ public abstract class Transfer extends TimerTask {
 
     public Integer getStatus() {
         return status;
+    }
+
+    public boolean isRun() {
+        return run;
     }
 }

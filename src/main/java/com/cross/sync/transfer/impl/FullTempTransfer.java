@@ -22,6 +22,12 @@ public class FullTempTransfer extends Transfer {
 
     @Override
     public void run() {
+        super.run = true;
+        transferData();
+        super.run = false;
+    }
+
+    private void transferData() {
         try {
             if (writeProvider.existFile(writePath)
                     && readProvider.getMD5FileHash(readPath).equals(writeProvider.getMD5FileHash(writePath))) {

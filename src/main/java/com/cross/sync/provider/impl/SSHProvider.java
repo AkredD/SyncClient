@@ -10,6 +10,7 @@ import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.sftp.OpenMode;
 import net.schmizz.sshj.sftp.RemoteFile;
+import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
 import java.io.Closeable;
@@ -56,7 +57,9 @@ public class SSHProvider implements Closeable, LinuxProvider {
         RemoteFile rf;
         try {
             createFile(path);
-            rf = ssh.newSFTPClient().open(path, WRITE_MODE);
+            SFTPClient sftpClient = ssh.newSFTPClient();
+            sftpClient.getFileTransfer().setPreserveAttributes(false);
+            rf = sftpClient.open(path, WRITE_MODE);
             return new RemoteOutputStream(rf);
         } catch (IOException e) {
             throw new SSHProviderException(e);
