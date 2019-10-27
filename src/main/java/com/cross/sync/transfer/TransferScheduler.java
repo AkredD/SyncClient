@@ -2,15 +2,22 @@ package com.cross.sync.transfer;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class TransferScheduler {
     private static TransferScheduler instance;
     private final Long TIMER_PERIOD = 300000L;
-    private final Map<Transfer, Timer> timers;
+    private final Integer THREAD_POOL_SIZE = 10;
+    private final Map<Transfer, ScheduledFuture> runningTransfers;
+    private final ScheduledThreadPoolExecutor executorService;
 
     private TransferScheduler() {
-        this.timers = new HashMap<>();
+        this.runningTransfers = new HashMap<>();
+        this.executorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(THREAD_POOL_SIZE);
+        this.executorService.setRemoveOnCancelPolicy(true);
     }
 
     public static TransferScheduler getInstance() {
@@ -25,18 +32,14 @@ public class TransferScheduler {
     }
 
     public void addForScheduling(Transfer transfer) {
-        if (!timers.containsKey(transfer)) {
-            Timer timer = new Timer();
-            timer.schedule(transfer, 0, TIMER_PERIOD);
-            timers.put(transfer, timer);
-        }
+        ScheduledFuture scheduledFuture = executorService.scheduleWithFixedDelay(transfer, 0, TIMER_PERIOD, TimeUnit.MILLISECONDS);
+        runningTransfers.put(transfer, scheduledFuture);
     }
 
     public void deleteFromScheduling(Transfer transfer) {
-        if (timers.containsKey(transfer)) {
-            timers.get(transfer).cancel();
-            timers.get(transfer).purge();
-            timers.remove(transfer);
+        if (runningTransfers.containsKey(transfer)) {
+            transfer.interrupt();
+            runningTransfers.get(transfer).cancel(false);
         }
     }
 }

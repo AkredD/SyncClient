@@ -11,9 +11,18 @@ public abstract class Transfer extends TimerTask {
     protected InputStream source;
     protected OutputStream destination;
     protected volatile boolean run = false;
+    protected volatile boolean interrupted;
     private volatile Integer status;
 
-    public abstract void run();
+    public void run() {
+        run = true;
+        interrupted = false;
+        transferData();
+        interrupted = false;
+        run = false;
+    }
+
+    protected abstract void transferData();
 
     protected void transferTo() {
         try {
@@ -25,7 +34,7 @@ public abstract class Transfer extends TimerTask {
                 destination.write(buffer, transferedSize, len);
                 transferedSize += len;
                 status = (int) ((((long) transferedSize) * 100L) / ((long) size));
-                if (Thread.currentThread().isInterrupted()) {
+                if (interrupted) {
                     return;
                 }
             }
@@ -40,5 +49,13 @@ public abstract class Transfer extends TimerTask {
 
     public boolean isRun() {
         return run;
+    }
+
+    public void interrupt() {
+        this.interrupted = true;
+    }
+
+    protected boolean isInterrupted() {
+        return interrupted;
     }
 }

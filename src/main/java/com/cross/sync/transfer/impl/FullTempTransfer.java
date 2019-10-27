@@ -21,13 +21,7 @@ public class FullTempTransfer extends Transfer {
     }
 
     @Override
-    public void run() {
-        super.run = true;
-        transferData();
-        super.run = false;
-    }
-
-    private void transferData() {
+    protected synchronized void transferData() {
         try {
             if (writeProvider.existFile(writePath)
                     && readProvider.getMD5FileHash(readPath).equals(writeProvider.getMD5FileHash(writePath))) {
@@ -41,15 +35,15 @@ public class FullTempTransfer extends Transfer {
             source = readProvider.loadFile(readPath);
             destination = writeProvider.uploadFile(writeTempPath);
             super.transferTo();
-            source.close();
-            destination.close();
-            if (Thread.currentThread().isInterrupted()) {
+            if (isInterrupted()) {
                 writeProvider.deleteFile(writeTempPath);
-                Slf4fLogger.info(this, String.format("Synchronizing file from %s by path '%s'  with %s '%s' was interrupted"
+                Slf4fLogger.info(this, String.format("Synchronizing file from %s by path '%s' with %s '%s' was interrupted"
                         , readProvider.getClass().getSimpleName(), readPath
                         , writeProvider.getClass().getSimpleName(), writePath));
                 return;
             }
+            source.close();
+            destination.close();
             writeProvider.moveFile(writeTempPath, writePath);
             Slf4fLogger.info(this, String.format("File from %s by path '%s' synchronized with %s '%s'"
                     , readProvider.getClass().getSimpleName(), readPath
