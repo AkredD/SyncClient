@@ -2,7 +2,7 @@ package com.cross.sync.swing;
 
 import com.cross.sync.provider.LinuxProvider;
 import com.cross.sync.provider.impl.SSHProvider;
-import com.cross.sync.view.controller.ResourceController;
+import com.cross.sync.swing.controller.ResourceController;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;

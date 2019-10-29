@@ -4,15 +4,18 @@ import com.cross.sync.exception.ProviderException;
 import com.cross.sync.provider.LinuxProvider;
 import com.cross.sync.provider.impl.LocalProvider;
 import com.cross.sync.provider.impl.SSHProvider;
+import com.cross.sync.swing.controller.ResourceController;
 import com.cross.sync.util.Slf4fLogger;
-import com.cross.sync.view.controller.ResourceController;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.HashSet;
 
 public class CreationProviderDialog extends JDialog {
     private final JDialog parent;
@@ -42,17 +45,9 @@ public class CreationProviderDialog extends JDialog {
         setSize(250, 200);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        buttonOK.addActionListener(e -> onOK());
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        buttonCancel.addActionListener(e -> onCancel());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -80,6 +75,11 @@ public class CreationProviderDialog extends JDialog {
         formAttrPane();
         hostField.setEnabled(false);
         loginField.setEnabled(false);
+    }
+
+    private void onCancel() {
+        // add your code here if necessary
+        dispose();
     }
 
     private void onOK() {
@@ -110,14 +110,10 @@ public class CreationProviderDialog extends JDialog {
                 return;
         }
         ResourceController.getInstance().getLinuxProviderMap().put(name, provider);
+        ResourceController.getInstance().getTransfersByProvider().put(name, new HashSet<>());
         if (parent instanceof ProviderDialog) {
             ((ProviderDialog) parent).updateProviderList();
         }
-        dispose();
-    }
-
-    private void onCancel() {
-        // add your code here if necessary
         dispose();
     }
 

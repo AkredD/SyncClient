@@ -5,11 +5,12 @@ import com.cross.sync.exception.ProviderException;
 import com.cross.sync.provider.impl.LocalProvider;
 import com.cross.sync.provider.impl.SSHProvider;
 import com.cross.sync.swing.JSync;
+import com.cross.sync.swing.controller.ResourceController;
 import com.cross.sync.transfer.TransferScheduler;
 import com.cross.sync.transfer.impl.FullTempTransfer;
-import com.cross.sync.view.controller.ResourceController;
 
 import java.io.IOException;
+import java.util.HashSet;
 
 public class SynchronizationClient {
     private final String home = System.getProperty("user.home") + "/";
@@ -25,6 +26,7 @@ public class SynchronizationClient {
     public static void main(String... args) throws ProviderException, IOException, InterruptedException {
         //(new SynchronizationClient()).run();
         ResourceController.getInstance().getLinuxProviderMap().put("local", new LocalProvider());
+        ResourceController.getInstance().getTransfersByProvider().put("local", new HashSet<>());
         com.cross.sync.swing.JSync dialog = new JSync();
         dialog.pack();
         dialog.setVisible(true);

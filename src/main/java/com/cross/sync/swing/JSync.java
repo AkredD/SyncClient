@@ -136,7 +136,7 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         JMenu helpMenu = createMenu(helpHelpTopic, KeyEvent.VK_H, mb);
 
 
-        createMenuItem(jobActionNew, KeyEvent.VK_N, jobMenu, KeyEvent.VK_N, this);
+        createMenuItem(jobActionOpen, KeyEvent.VK_N, jobMenu, KeyEvent.VK_N, this);
 
         createMenuItem(providerActionShow, KeyEvent.VK_S, providerMenu, KeyEvent.VK_P, this);
 
@@ -151,6 +151,11 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         switch (cmdText) {
             case providerActionShow: {
                 JDialog dialog = new ProviderDialog(this, true);
+                dialog.setVisible(true);
+                break;
+            }
+            case jobActionOpen: {
+                JDialog dialog = new TransferDialog(this, true);
                 dialog.setVisible(true);
                 break;
             }

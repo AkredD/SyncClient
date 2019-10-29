@@ -7,8 +7,7 @@ interface MenuConstants {
 
     final String syncTransferJob = "Job";
 
-    final String jobActionNew = "New";
-    final String jobActionDelete = "Delete";
+    final String jobActionOpen = "Open";
     final String providerActionShow = "Show";
     final String actionStart = "Start";
     final String actionStop = "Stop";
