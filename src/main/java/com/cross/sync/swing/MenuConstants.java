@@ -9,8 +9,7 @@ interface MenuConstants {
 
     final String jobActionNew = "New";
     final String jobActionDelete = "Delete";
-    final String providerActionCreate = "Create";
-    final String providerActionRemove = "Remove";
+    final String providerActionShow = "Show";
     final String actionStart = "Start";
     final String actionStop = "Stop";
     final String actionAbort = "Abort";

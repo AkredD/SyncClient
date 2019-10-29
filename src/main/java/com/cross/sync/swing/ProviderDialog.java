@@ -1,5 +1,8 @@
 package com.cross.sync.swing;
 
+import com.cross.sync.provider.LinuxProvider;
+import com.cross.sync.provider.impl.SSHProvider;
+import com.cross.sync.view.controller.ResourceController;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -7,13 +10,16 @@ import com.intellij.uiDesigner.core.Spacer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class ProviderDialog extends JDialog {
     private JPanel contentPane;
-    private JButton deleteButton;
+    private JButton deleteButton = new JButton();
     private JButton Cancel;
     private JList list1;
     private JButton Add;
+    private DefaultListModel providersModel = new DefaultListModel();
+    private Integer selectedProviderIndex = -1;
 
     public ProviderDialog(Frame parent, Boolean modal) {
         super(parent, modal);
@@ -24,18 +30,27 @@ public class ProviderDialog extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(Cancel);
 
-        deleteButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
+        deleteButton.addActionListener(e -> {
+            if (selectedProviderIndex != -1) {
+                LinuxProvider provider = ResourceController.getInstance().getLinuxProviderMap().remove(providersModel.get(selectedProviderIndex));
+                if (provider instanceof SSHProvider) {
+                    try {
+                        ((SSHProvider) provider).close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                providersModel.remove(selectedProviderIndex);
+                selectedProviderIndex = -1;
             }
         });
 
-        Cancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        Cancel.addActionListener(e -> onCancel());
 
+        Add.addActionListener(e -> {
+            JDialog dialog = new CreationProviderDialog(this, true);
+            dialog.setVisible(true);
+        });
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -50,6 +65,18 @@ public class ProviderDialog extends JDialog {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        list1.addListSelectionListener(ev -> {
+            selectedProviderIndex = list1.getSelectedIndex();
+        });
+
+        list1.setModel(providersModel);
+        updateProviderList();
+    }
+
+    void updateProviderList() {
+        providersModel.clear();
+        providersModel.addAll(ResourceController.getInstance().getLinuxProviderMap().keySet());
     }
 
     private void onOK() {
