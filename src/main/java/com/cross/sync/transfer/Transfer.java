@@ -31,7 +31,7 @@ public abstract class Transfer extends TimerTask {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = source.read(buffer)) != -1) {
-                destination.write(buffer, transferedSize, len);
+                destination.write(buffer, 0, len);
                 transferedSize += len;
                 status = (int) ((((long) transferedSize) * 100L) / ((long) size));
                 if (interrupted) {

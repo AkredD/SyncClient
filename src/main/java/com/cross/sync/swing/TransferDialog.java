@@ -13,6 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class TransferDialog extends JDialog {
+    private final Frame parent;
     private JPanel contentPane;
     private JButton deleteButton;
     private JButton buttonCancel;
@@ -29,6 +30,8 @@ public class TransferDialog extends JDialog {
 
     TransferDialog(Frame parent, Boolean modal) {
         super(parent, modal);
+        setTitle("Jobs");
+        this.parent = parent;
         setContentPane(contentPane);
         setSize(400, 325);
         getRootPane().setDefaultButton(deleteButton);
@@ -60,12 +63,17 @@ public class TransferDialog extends JDialog {
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         jobsList.setModel(jobsModel);
+
+
         updateJobList();
     }
 
     void updateJobList() {
         jobsModel.clear();
         jobsModel.addAll(ResourceController.getInstance().getTransferMap().keySet());
+        if (parent instanceof JSync) {
+            ((JSync) parent).updateTransferPane();
+        }
     }
 
     private void onOK() {
@@ -115,7 +123,6 @@ public class TransferDialog extends JDialog {
     }
 
     /**
-     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;

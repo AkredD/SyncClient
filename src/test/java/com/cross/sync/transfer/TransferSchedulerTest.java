@@ -27,7 +27,7 @@ class TransferSchedulerTest {
             remoteProvider = new SSHProvider("localhost", System.getProperty("user.name"));
             remoteProvider.open();
             localProvider = new LocalProvider();
-        } catch (IOException e) {
+        } catch (ProviderException e) {
             e.printStackTrace();
             fail();
         }

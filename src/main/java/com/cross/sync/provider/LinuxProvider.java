@@ -4,6 +4,8 @@ import com.cross.sync.exception.ProviderException;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public interface LinuxProvider {
     /**
@@ -79,4 +81,28 @@ public interface LinuxProvider {
      * @throws ProviderException provider exception
      */
     Boolean existFile(String path) throws ProviderException;
+
+    /**
+     * Check for file read privileges
+     *
+     * @param path path to file
+     * @return true if can read false otherwise
+     * @throws ProviderException provider exception
+     */
+    Boolean canRead(String path) throws ProviderException;
+
+    /**
+     * Check for file write privileges
+     *
+     * @param path path to file
+     * @return true if can write and false otherwise
+     * @throws ProviderException provider exception
+     */
+    Boolean canWrite(String path) throws ProviderException;
+
+    default Boolean validatePath(String path) {
+        Pattern pathTemplate = Pattern.compile("\\/([\\.A-z0-9-_+]+\\/)*[\\.A-z0-9-_+]+");
+        Matcher m = pathTemplate.matcher(path);
+        return m.matches();
+    }
 }

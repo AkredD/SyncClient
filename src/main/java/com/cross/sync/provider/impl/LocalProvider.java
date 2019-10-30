@@ -1,13 +1,13 @@
 package com.cross.sync.provider.impl;
 
 import com.cross.sync.exception.LocalProviderException;
-import com.cross.sync.exception.ProviderException;
 import com.cross.sync.provider.LinuxProvider;
 
 import java.io.*;
 import java.util.Random;
 
 public class LocalProvider implements LinuxProvider {
+
     @Override
     public InputStream loadFile(String path) throws LocalProviderException {
         try {
@@ -98,8 +98,30 @@ public class LocalProvider implements LinuxProvider {
     }
 
     @Override
-    public Boolean existFile(String path) throws ProviderException {
+    public Boolean existFile(String path) {
         File file = new File(path);
         return file.exists();
+    }
+
+    @Override
+    public Boolean canRead(String path) {
+        File file = new File(path);
+        return file.canRead();
+    }
+
+    @Override
+    public Boolean canWrite(String path) {
+        String writableCheckingPath = path;
+        if (!existFile(path)) {
+            String[] separatedPartsOfPath = path.split("/");
+            StringBuilder pathBuilder = new StringBuilder("/");
+            for (int i = 0; i < separatedPartsOfPath.length - 1; ++i) {
+                pathBuilder.append(separatedPartsOfPath[i]);
+                pathBuilder.append("/");
+            }
+            writableCheckingPath = pathBuilder.toString();
+        }
+        File file = new File(writableCheckingPath);
+        return file.canWrite();
     }
 }

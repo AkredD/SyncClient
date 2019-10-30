@@ -120,12 +120,16 @@ public class SSHProvider implements Closeable, LinuxProvider {
         return true;
     }
 
-    public void open() throws IOException {
-        this.ssh = new SSHClient();
-        this.ssh.addHostKeyVerifier(new PromiscuousVerifier());
-        this.ssh.loadKnownHosts();
-        this.ssh.connect(host);
-        this.ssh.authPublickey(publicKey);
+    public void open() throws ProviderException {
+        try {
+            this.ssh = new SSHClient();
+            this.ssh.addHostKeyVerifier(new PromiscuousVerifier());
+            this.ssh.loadKnownHosts();
+            this.ssh.connect(host);
+            this.ssh.authPublickey(publicKey);
+        } catch (IOException e) {
+            throw new SSHProviderException(String.format("Can't connect via ssh to %s with login %s", host, publicKey), e);
+        }
     }
 
     @Override
@@ -136,9 +140,41 @@ public class SSHProvider implements Closeable, LinuxProvider {
     @Override
     public Boolean existFile(String path) {
         try (Session session = ssh.startSession()) {
-            final Session.Command cmd = session.exec("test -f ./" + path + " && echo \"Found\" || echo \"Not Found\"");
+            final Session.Command cmd = session.exec(String.format("test -f %s && echo \"Yes\" || echo \"No\"", path));
             String answer = IOUtils.readFully(cmd.getInputStream()).toString();
-            return answer.equals("Found");
+            return answer.startsWith("Yes");
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean canRead(String path) {
+        try (Session session = ssh.startSession()) {
+            final Session.Command cmd = session.exec(String.format("test -r %s && echo \"Yes\" || echo \"No\"", path));
+            String answer = IOUtils.readFully(cmd.getInputStream()).toString();
+            return answer.startsWith("Yes");
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean canWrite(String path) {
+        try (Session session = ssh.startSession()) {
+            String writableCheckingPath = path;
+            if (!existFile(path)) {
+                String[] separatedPartsOfPath = path.split("/");
+                StringBuilder pathBuilder = new StringBuilder("/");
+                for (int i = 0; i < separatedPartsOfPath.length - 1; ++i) {
+                    pathBuilder.append(separatedPartsOfPath[i]);
+                    pathBuilder.append("/");
+                }
+                writableCheckingPath = pathBuilder.toString();
+            }
+            final Session.Command cmd = session.exec(String.format("test -w %s && echo \"Yes\" || echo \"No\"", writableCheckingPath));
+            String answer = IOUtils.readFully(cmd.getInputStream()).toString();
+            return answer.startsWith("Yes");
         } catch (IOException e) {
             return false;
         }

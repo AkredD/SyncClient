@@ -42,6 +42,7 @@ public class TransferScheduler {
         if (runningTransfers.containsKey(transfer)) {
             transfer.interrupt();
             runningTransfers.get(transfer).cancel(false);
+            runningTransfers.remove(transfer);
         }
     }
 

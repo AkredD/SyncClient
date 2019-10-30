@@ -21,7 +21,7 @@ class SSHProviderTest {
         try {
             provider.open();
             provider.ping();
-        } catch (IOException e) {
+        } catch (ProviderException e) {
             e.printStackTrace();
             fail();
         }

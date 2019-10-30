@@ -26,7 +26,7 @@ class FullTempTransferTest {
         try {
             remoteProvider.open();
             remoteProvider.ping();
-        } catch (IOException e) {
+        } catch (ProviderException e) {
             e.printStackTrace();
             fail();
         }

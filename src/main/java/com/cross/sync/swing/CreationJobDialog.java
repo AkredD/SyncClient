@@ -1,5 +1,6 @@
 package com.cross.sync.swing;
 
+import com.cross.sync.exception.ProviderException;
 import com.cross.sync.provider.LinuxProvider;
 import com.cross.sync.swing.controller.ResourceController;
 import com.cross.sync.transfer.Transfer;
@@ -36,6 +37,7 @@ public class CreationJobDialog extends JDialog {
 
     CreationJobDialog(JDialog parent, Boolean modal) {
         super(parent, modal);
+        setTitle("Job creation");
         this.parent = parent;
         setContentPane(contentPane);
         setSize(250, 230);
@@ -66,10 +68,15 @@ public class CreationJobDialog extends JDialog {
                 || pathToField.getText() == null || pathToField.getText().isBlank()
                 || nameField.getText() == null || nameField.getText().isBlank()
                 || providerToBox.getSelectedItem() == null || providerFromBox.getSelectedItem() == null) {
+            JDialog dialogError = new ExceptionDialog(this, true, "Please, fill all fields");
+            dialogError.setVisible(true);
             return;
         }
         LinuxProvider fromProvider = ResourceController.getInstance().getLinuxProviderMap().get(providerFromBox.getSelectedItem());
         LinuxProvider toProvider = ResourceController.getInstance().getLinuxProviderMap().get(providerToBox.getSelectedItem());
+        if (!validatePathes(fromProvider, pathFromField.getText(), toProvider, pathToField.getText())) {
+            return;
+        }
         Transfer transfer = new FullTempTransfer(fromProvider, pathFromField.getText(), toProvider, pathToField.getText());
         ResourceController.getInstance().getTransferMap().put(nameField.getText(), transfer);
         ResourceController.getInstance().getTransfersByProvider().get(providerFromBox.getSelectedItem()).add(transfer);
@@ -78,6 +85,36 @@ public class CreationJobDialog extends JDialog {
             ((TransferDialog) parent).updateJobList();
         }
         dispose();
+    }
+
+    private boolean validatePathes(LinuxProvider fromProvider, String fromPath, LinuxProvider toProvider, String toPath) {
+        JDialog dialogFrom = null;
+        JDialog dialogTo = null;
+        try {
+            if (!fromProvider.validatePath(fromPath)) {
+                dialogFrom = new ExceptionDialog(this, true, String.format("From path '%s' is not valide", fromPath));
+            } else if (!fromProvider.existFile(fromPath)) {
+                dialogFrom = new ExceptionDialog(this, true, String.format("From file '%s' doesn't exists", fromPath));
+            } else if (!fromProvider.canRead(fromPath)) {
+                dialogFrom = new ExceptionDialog(this, true, String.format("Can't read from file '%s'", fromPath));
+            } else if (!toProvider.validatePath(toPath)) {
+                dialogTo = new ExceptionDialog(this, true, String.format("To path '%s' is not valide", toPath));
+            } else if (!toProvider.canWrite(toPath)) {
+                dialogTo = new ExceptionDialog(this, true, String.format("Can't write to path '%s'", toPath));
+            }
+            if (dialogFrom != null) {
+                dialogFrom.setVisible(true);
+                return false;
+            }
+            if (dialogTo != null) {
+                dialogTo.setVisible(true);
+                return false;
+            }
+            return true;
+        } catch (ProviderException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void onCancel() {
@@ -145,7 +182,6 @@ public class CreationJobDialog extends JDialog {
     }
 
     /**
-     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;

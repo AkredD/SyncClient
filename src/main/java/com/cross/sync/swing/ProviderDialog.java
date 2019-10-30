@@ -15,7 +15,7 @@ import java.io.IOException;
 @SuppressWarnings("ALL")
 public class ProviderDialog extends JDialog {
     private JPanel contentPane;
-    private JButton deleteButton;
+    private JButton deleteButton = new JButton();
     private JButton Cancel;
     private JList list1;
     private JButton Add;
@@ -24,13 +24,13 @@ public class ProviderDialog extends JDialog {
 
     public ProviderDialog(Frame parent, Boolean modal) {
         super(parent, modal);
+        setTitle("Providers");
         $$$setupUI$$$();
         setContentPane(contentPane);
         setTitle("Providers");
         setSize(400, 325);
         setModal(true);
         getRootPane().setDefaultButton(Cancel);
-
         deleteButton.addActionListener(e -> {
             if (selectedProviderIndex != -1) {
                 LinuxProvider provider = ResourceController.getInstance().getLinuxProviderMap().remove(providersModel.get(selectedProviderIndex));
@@ -133,6 +133,7 @@ public class ProviderDialog extends JDialog {
     }
 
     /**
+     *
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;

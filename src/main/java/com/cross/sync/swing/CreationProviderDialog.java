@@ -37,48 +37,9 @@ public class CreationProviderDialog extends JDialog {
         $$$setupUI$$$();
     }
 
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
-    }
-
-    private void onOK() {
-        LinuxProvider provider;
-        String name = nameField.getText();
-        String host = hostField.getText();
-        String user = loginField.getText();
-        if (name == null || name.isBlank()) {
-            return;
-        }
-        switch (providerClassName) {
-            case "LocalProvider":
-                provider = new LocalProvider();
-                break;
-            case "SSHProvider":
-                if (host == null || host.isBlank() || user == null || user.isBlank()) {
-                    return;
-                }
-                provider = new SSHProvider(host, user);
-                try {
-                    provider.ping();
-                } catch (ProviderException e) {
-                    Slf4fLogger.error(this, e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-            default:
-                return;
-        }
-        ResourceController.getInstance().getLinuxProviderMap().put(name, provider);
-        ResourceController.getInstance().getTransfersByProvider().put(name, new HashSet<>());
-        if (parent instanceof ProviderDialog) {
-            ((ProviderDialog) parent).updateProviderList();
-        }
-        dispose();
-    }
-
     CreationProviderDialog(JDialog parent, Boolean modal) {
         super(parent, modal);
+        setTitle("Provider creation");
         this.parent = parent;
         setContentPane(contentPane);
         setModal(true);
@@ -115,6 +76,53 @@ public class CreationProviderDialog extends JDialog {
         formAttrPane();
         hostField.setEnabled(false);
         loginField.setEnabled(false);
+    }
+
+    private void onCancel() {
+        // add your code here if necessary
+        dispose();
+    }
+
+    private void onOK() {
+        LinuxProvider provider;
+        String name = nameField.getText();
+        String host = hostField.getText();
+        String user = loginField.getText();
+        if (name == null || name.isBlank()) {
+            JDialog dialogError = new ExceptionDialog(this, true, "Please, fill name field");
+            dialogError.setVisible(true);
+            return;
+        }
+        switch (providerClassName) {
+            case "LocalProvider":
+                provider = new LocalProvider();
+                break;
+            case "SSHProvider":
+                if (host == null || host.isBlank() || user == null || user.isBlank()) {
+                    JDialog dialogError = new ExceptionDialog(this, true, "Please, fill host,and user fields");
+                    dialogError.setVisible(true);
+                    return;
+                }
+                provider = new SSHProvider(host, user);
+                try {
+                    ((SSHProvider) provider).open();
+                    provider.ping();
+                    break;
+                } catch (ProviderException e) {
+                    Slf4fLogger.error(this, e.getMessage());
+                    JDialog dialogError = new ExceptionDialog(this, true, e.getMessage());
+                    dialogError.setVisible(true);
+                    return;
+                }
+            default:
+                return;
+        }
+        ResourceController.getInstance().getLinuxProviderMap().put(name, provider);
+        ResourceController.getInstance().getTransfersByProvider().put(name, new HashSet<>());
+        if (parent instanceof ProviderDialog) {
+            ((ProviderDialog) parent).updateProviderList();
+        }
+        dispose();
     }
 
     private void formAttrPane() {
@@ -174,7 +182,6 @@ public class CreationProviderDialog extends JDialog {
     }
 
     /**
-     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;

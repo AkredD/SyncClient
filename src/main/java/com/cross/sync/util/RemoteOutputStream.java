@@ -11,7 +11,6 @@ public class RemoteOutputStream extends ByteArrayOutputStream implements Closeab
     private static final int DEFAULT_BUFFER_SIZE = 8192;
     private final RemoteFile rf;
 
-
     public RemoteOutputStream(final RemoteFile rf) {
         super(DEFAULT_BUFFER_SIZE);
         this.rf = rf;
@@ -32,7 +31,7 @@ public class RemoteOutputStream extends ByteArrayOutputStream implements Closeab
     @Override
     public synchronized void write(byte[] b, int off, int len) {
         try {
-            rf.write(off, b, 0, len);
+            rf.write(count, b, 0, len);
             super.count += len;
         } catch (IOException e) {
             throw new RuntimeException(e);
