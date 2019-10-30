@@ -12,9 +12,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 
+@SuppressWarnings("ALL")
 public class ProviderDialog extends JDialog {
     private JPanel contentPane;
-    private JButton deleteButton = new JButton();
+    private JButton deleteButton;
     private JButton Cancel;
     private JList list1;
     private JButton Add;
@@ -132,7 +133,6 @@ public class ProviderDialog extends JDialog {
     }
 
     /**
-     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;

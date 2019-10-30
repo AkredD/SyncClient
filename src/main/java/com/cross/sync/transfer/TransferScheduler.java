@@ -32,8 +32,10 @@ public class TransferScheduler {
     }
 
     public void addForScheduling(Transfer transfer) {
-        ScheduledFuture scheduledFuture = executorService.scheduleWithFixedDelay(transfer, 0, TIMER_PERIOD, TimeUnit.MILLISECONDS);
-        runningTransfers.put(transfer, scheduledFuture);
+        if (!runningTransfers.containsKey(transfer)) {
+            ScheduledFuture scheduledFuture = executorService.scheduleWithFixedDelay(transfer, 0, TIMER_PERIOD, TimeUnit.MILLISECONDS);
+            runningTransfers.put(transfer, scheduledFuture);
+        }
     }
 
     public void deleteFromScheduling(Transfer transfer) {
@@ -42,4 +44,10 @@ public class TransferScheduler {
             runningTransfers.get(transfer).cancel(false);
         }
     }
+
+    public boolean isTransferScheduling(Transfer transfer) {
+        return runningTransfers.containsKey(transfer);
+    }
+
+
 }

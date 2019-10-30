@@ -2,6 +2,7 @@ package com.cross.sync;
 
 
 import com.cross.sync.exception.ProviderException;
+import com.cross.sync.provider.LinuxProvider;
 import com.cross.sync.provider.impl.LocalProvider;
 import com.cross.sync.provider.impl.SSHProvider;
 import com.cross.sync.swing.JSync;
@@ -23,16 +24,21 @@ public class SynchronizationClient {
     private String fromPathSecond;
     private String toPathSecond;
 
-    public static void main(String... args) throws ProviderException, IOException, InterruptedException {
+    public static void main(String... args) {
         //(new SynchronizationClient()).run();
-        ResourceController.getInstance().getLinuxProviderMap().put("local", new LocalProvider());
+        LinuxProvider provider = new LocalProvider();
+        ResourceController.getInstance().getLinuxProviderMap().put("local", provider);
         ResourceController.getInstance().getTransfersByProvider().put("local", new HashSet<>());
+        ResourceController.getInstance().getTransferMap().put("test", new FullTempTransfer(provider, "from", provider, "to"));
+        ResourceController.getInstance().getTransferMap().put("test2", new FullTempTransfer(provider, "from", provider, "to"));
+        ResourceController.getInstance().getTransferMap().put("test3", new FullTempTransfer(provider, "from", provider, "to"));
+        ResourceController.getInstance().getTransferMap().put("test4", new FullTempTransfer(provider, "from", provider, "to"));
         com.cross.sync.swing.JSync dialog = new JSync();
         dialog.pack();
         dialog.setVisible(true);
     }
 
-    void setUp() {
+    private void setUp() {
         try {
             //remoteProvider = new SSHProvider("192.168.0.103", "macbook");
             remoteProvider = new SSHProvider("localhost", "akredd");
@@ -47,7 +53,7 @@ public class SynchronizationClient {
         toPathSecond = remoteHome + "test2.to";
     }
 
-    void tearDown() {
+    private void tearDown() {
         try {
             remoteProvider.close();
         } catch (IOException e) {

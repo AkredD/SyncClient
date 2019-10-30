@@ -10,9 +10,9 @@ import java.util.TimerTask;
 public abstract class Transfer extends TimerTask {
     protected InputStream source;
     protected OutputStream destination;
-    protected volatile boolean run = false;
-    protected volatile boolean interrupted;
-    private volatile Integer status;
+    private volatile boolean run = false;
+    private volatile boolean interrupted;
+    private volatile Integer status = 0;
 
     public void run() {
         run = true;
@@ -47,11 +47,15 @@ public abstract class Transfer extends TimerTask {
         return status;
     }
 
+    public void setInteger(int a) {
+        status = a % 100;
+    }
+
     public boolean isRun() {
         return run;
     }
 
-    public void interrupt() {
+    void interrupt() {
         this.interrupted = true;
     }
 

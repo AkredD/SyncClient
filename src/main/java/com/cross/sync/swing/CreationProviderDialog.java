@@ -22,9 +22,9 @@ public class CreationProviderDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JComboBox comboBox1;
+    private JComboBox<String> comboBox1;
     private JPanel AttrPane;
-    private ComboBoxModel comboBoxModel;
+    private ComboBoxModel<String> comboBoxModel;
     private String providerClassName = "LocalProvider";
     private JTextField nameField;
     private JTextField hostField;
@@ -35,46 +35,6 @@ public class CreationProviderDialog extends JDialog {
 // >>> IMPORTANT!! <<<
 // DO NOT EDIT OR ADD ANY CODE HERE!
         $$$setupUI$$$();
-    }
-
-    public CreationProviderDialog(JDialog parent, Boolean modal) {
-        super(parent, modal);
-        this.parent = parent;
-        setContentPane(contentPane);
-        setModal(true);
-        setSize(250, 200);
-        getRootPane().setDefaultButton(buttonOK);
-
-        buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
-
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        comboBox1.addActionListener(ev -> {
-            providerClassName = (String) comboBoxModel.getSelectedItem();
-            switch (providerClassName) {
-                case "LocalProvider":
-                    hostField.setEnabled(false);
-                    loginField.setEnabled(false);
-                    break;
-                case "SSHProvider":
-                    hostField.setEnabled(true);
-                    loginField.setEnabled(true);
-            }
-        });
-        formAttrPane();
-        hostField.setEnabled(false);
-        loginField.setEnabled(false);
     }
 
     private void onCancel() {
@@ -117,9 +77,49 @@ public class CreationProviderDialog extends JDialog {
         dispose();
     }
 
+    CreationProviderDialog(JDialog parent, Boolean modal) {
+        super(parent, modal);
+        this.parent = parent;
+        setContentPane(contentPane);
+        setModal(true);
+        setSize(250, 200);
+        getRootPane().setDefaultButton(buttonOK);
+
+        buttonOK.addActionListener(e -> onOK());
+
+        buttonCancel.addActionListener(e -> onCancel());
+
+        // call onCancel() when cross is clicked
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+
+        // call onCancel() on ESCAPE
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        comboBox1.addActionListener(ev -> {
+            providerClassName = (String) comboBoxModel.getSelectedItem();
+            switch (providerClassName) {
+                case "LocalProvider":
+                    hostField.setEnabled(false);
+                    loginField.setEnabled(false);
+                    break;
+                case "SSHProvider":
+                    hostField.setEnabled(true);
+                    loginField.setEnabled(true);
+            }
+        });
+        formAttrPane();
+        hostField.setEnabled(false);
+        loginField.setEnabled(false);
+    }
+
     private void formAttrPane() {
         String[] providerClasses = {"LocalProvider", "SSHProvider"};
-        comboBoxModel = new DefaultComboBoxModel(providerClasses);
+        comboBoxModel = new DefaultComboBoxModel<>(providerClasses);
         comboBox1.setModel(comboBoxModel);
         comboBox1.setEditable(false);
 

@@ -1,5 +1,7 @@
 package com.cross.sync.swing;
 
+import com.cross.sync.swing.controller.ResourceController;
+import com.cross.sync.transfer.Transfer;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -7,28 +9,27 @@ import com.intellij.uiDesigner.core.Spacer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class JSync extends JFrame implements MenuConstants, ActionListener {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JTable table1;
+    private JPanel rowPane;
+    private Thread updateThread;
+    private List<TransformationRow> transformationRows;
 
     public JSync() {
+        transformationRows = new ArrayList<>();
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        buttonOK.addActionListener(e -> onOK());
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        buttonCancel.addActionListener(e -> onCancel());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -39,17 +40,49 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         });
 
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
+        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (updateThread != null) {
+                    updateThread.interrupt();
+                }
             }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        });
         createMenuBar(this);
+        updateTransferPane();
     }
 
     private void onOK() {
         // add your code here
         dispose();
+    }
+
+    private void updateTransferPane() {
+        if (updateThread != null) {
+            updateThread.interrupt();
+        }
+        transformationRows.clear();
+        Set<Map.Entry<String, Transfer>> transferList = ResourceController.getInstance().getTransferMap().entrySet();
+        rowPane.removeAll();
+        rowPane.setLayout(new GridLayout(transferList.size(), 1));
+        transferList.forEach(transferEntry -> {
+            TransformationRow row = new TransformationRow(transferEntry.getValue(), transferEntry.getKey());
+            transformationRows.add(row);
+            rowPane.add(row.getContent());
+        });
+        updateThread = new Thread(() -> {
+            while (true) {
+                transformationRows.forEach(TransformationRow::updateStatus);
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+        });
+        updateThread.start();
     }
 
     private void onCancel() {
@@ -90,10 +123,13 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         buttonCancel.setText("Cancel");
         panel2.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new BorderLayout(0, 0));
+        panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        table1 = new JTable();
-        panel3.add(table1, BorderLayout.CENTER);
+        final JScrollPane scrollPane1 = new JScrollPane();
+        panel3.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        rowPane = new JPanel();
+        rowPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        scrollPane1.setViewportView(rowPane);
     }
 
     /**
@@ -103,14 +139,14 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         return contentPane;
     }
 
-    JMenu createMenu(String s, int key, JMenuBar toMenuBar) {
+    private JMenu createMenu(String s, int key, JMenuBar toMenuBar) {
         JMenu temp = new JMenu(s);
         temp.setMnemonic(key);
         toMenuBar.add(temp);
         return temp;
     }
 
-    JMenuItem createMenuItem(String s, int key, JMenu toMenu, ActionListener al) {
+    private JMenuItem createMenuItem(String s, int key, JMenu toMenu, ActionListener al) {
         JMenuItem temp = new JMenuItem(s, key);
         temp.addActionListener(al);
         toMenu.add(temp);
@@ -118,7 +154,7 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         return temp;
     }
 
-    JMenuItem createMenuItem(String s, int key, JMenu toMenu, int aclKey, ActionListener al) {
+    private JMenuItem createMenuItem(String s, int key, JMenu toMenu, int aclKey, ActionListener al) {
         JMenuItem temp = new JMenuItem(s, key);
         temp.addActionListener(al);
         temp.setAccelerator(KeyStroke.getKeyStroke(aclKey, ActionEvent.CTRL_MASK));
@@ -127,7 +163,7 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         return temp;
     }
 
-    void createMenuBar(JFrame f) {
+    private void createMenuBar(JFrame f) {
         JMenuBar mb = new JMenuBar();
         JMenuItem temp;
 
