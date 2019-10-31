@@ -179,12 +179,4 @@ public class SSHProvider implements Closeable, LinuxProvider {
             return false;
         }
     }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
 }
