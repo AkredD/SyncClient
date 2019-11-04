@@ -1,10 +1,16 @@
 package com.cross.sync.provider.impl;
 
 import com.cross.sync.exception.LocalProviderException;
+import com.cross.sync.exception.ProviderException;
 import com.cross.sync.provider.LinuxProvider;
+import com.cross.sync.util.Slf4fLogger;
 
 import java.io.*;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LocalProvider implements LinuxProvider {
 
@@ -28,7 +34,6 @@ public class LocalProvider implements LinuxProvider {
     public OutputStream uploadFile(String path) throws LocalProviderException {
         try {
             File file = new File(path);
-            file.createNewFile();
             if (!file.canWrite()) {
                 throw new LocalProviderException(String.format("Can't write file: %s", path));
             }
@@ -38,25 +43,10 @@ public class LocalProvider implements LinuxProvider {
         }
     }
 
-
     @Override
-    public String getMD5FileHash(String path) throws LocalProviderException {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", "md5sum " + path);
-        try {
-            Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-            String answer = reader.readLine();
-            String result = (answer == null || answer.isBlank()) ? ((Double) new Random().nextDouble()).toString() : answer.split(" ")[0];
-            int exitVal = process.waitFor();
-            if (exitVal != 0) {
-                throw new LocalProviderException(String.format("Can't execute command: {md5sum %s}", path));
-            }
-            return result;
-        } catch (IOException | InterruptedException e) {
-            throw new LocalProviderException(e);
-        }
+    public Long getMTime(String path) {
+        File file = new File(path);
+        return file.lastModified();
     }
 
     @Override
@@ -68,16 +58,28 @@ public class LocalProvider implements LinuxProvider {
     public void createFile(String path) throws LocalProviderException {
         try {
             File file = new File(path);
-            file.createNewFile();
+            if (!file.createNewFile()) {
+                Slf4fLogger.info(this, String.format("Can't create file '%s'", path));
+            }
         } catch (IOException e) {
             throw new LocalProviderException(e);
         }
     }
 
     @Override
+    public void createDirectory(String path) {
+        File file = new File(path);
+        if (!file.mkdir()) {
+            Slf4fLogger.info(this, String.format("Can't create directory '%s'", path));
+        }
+    }
+
+    @Override
     public void deleteFile(String path) {
         File file = new File(path);
-        file.delete();
+        if (!file.delete()) {
+            Slf4fLogger.info(this, String.format("File '%s' already deleted", path));
+        }
     }
 
     @Override
@@ -86,8 +88,6 @@ public class LocalProvider implements LinuxProvider {
         processBuilder.command("bash", "-c", "mv " + from + " " + to);
         try {
             Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
             int exitVal = process.waitFor();
             if (exitVal != 0) {
                 throw new LocalProviderException(String.format("Can't execute command: {mv %s %s}", from, to));
@@ -123,5 +123,31 @@ public class LocalProvider implements LinuxProvider {
         }
         File file = new File(writableCheckingPath);
         return file.canWrite();
+    }
+
+    @Override
+    public Boolean isDirectory(String path) {
+        File file = new File(path);
+        return file.isDirectory();
+    }
+
+    @Override
+    public List<String> getFileList(String path) throws ProviderException {
+        File directory = new File(path);
+        if (!directory.isDirectory()) {
+            throw new LocalProviderException(String.format("'%s' is not directory", path));
+        }
+        if (directory.listFiles() == null) {
+            return new ArrayList<>();
+        }
+        return Stream.of(Objects.requireNonNull(directory.listFiles()))
+                .map(File::getName)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long getSize(String path) {
+        File file = new File(path);
+        return file.length();
     }
 }

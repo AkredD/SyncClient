@@ -7,7 +7,7 @@ import com.intellij.uiDesigner.core.Spacer;
 import javax.swing.*;
 import java.awt.*;
 
-public class ExceptionDialog extends JDialog {
+class ExceptionDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JTextArea messageArea;
@@ -19,8 +19,8 @@ public class ExceptionDialog extends JDialog {
         $$$setupUI$$$();
     }
 
-    ExceptionDialog(JDialog dialog, Boolean modal, String message) {
-        super(dialog, modal);
+    ExceptionDialog(JDialog dialog, String message) {
+        super(dialog, true);
         setTitle("Alert");
         messageArea.setText(message);
         messageArea.setEditable(false);
@@ -66,9 +66,10 @@ public class ExceptionDialog extends JDialog {
     }
 
     /**
-     *
+     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

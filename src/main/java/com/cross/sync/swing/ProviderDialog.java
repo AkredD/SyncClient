@@ -49,7 +49,7 @@ public class ProviderDialog extends JDialog {
         Cancel.addActionListener(e -> onCancel());
 
         Add.addActionListener(e -> {
-            JDialog dialog = new CreationProviderDialog(this, true);
+            JDialog dialog = new CreationProviderDialog(this);
             dialog.setVisible(true);
         });
         // call onCancel() when cross is clicked

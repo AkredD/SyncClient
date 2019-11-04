@@ -9,13 +9,12 @@ import java.util.concurrent.TimeUnit;
 
 public class TransferScheduler {
     private static TransferScheduler instance;
-    private final Long TIMER_PERIOD = 300000L;
-    private final Integer THREAD_POOL_SIZE = 10;
     private final Map<Transfer, ScheduledFuture> runningTransfers;
     private final ScheduledThreadPoolExecutor executorService;
 
     private TransferScheduler() {
         this.runningTransfers = new HashMap<>();
+        int THREAD_POOL_SIZE = 10;
         this.executorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(THREAD_POOL_SIZE);
         this.executorService.setRemoveOnCancelPolicy(true);
     }
@@ -33,6 +32,7 @@ public class TransferScheduler {
 
     public void addForScheduling(Transfer transfer) {
         if (!runningTransfers.containsKey(transfer)) {
+            long TIMER_PERIOD = 60000L;
             ScheduledFuture scheduledFuture = executorService.scheduleWithFixedDelay(transfer, 0, TIMER_PERIOD, TimeUnit.MILLISECONDS);
             runningTransfers.put(transfer, scheduledFuture);
         }

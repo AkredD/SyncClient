@@ -8,7 +8,7 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 import javax.swing.*;
 import java.awt.*;
 
-public class TransformationRow extends JPanel {
+class TransformationRow extends JPanel {
     private JPanel transformRow;
     private JLabel Status;
     private JProgressBar transformStatus;

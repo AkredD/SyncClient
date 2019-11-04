@@ -1,5 +1,6 @@
 package com.cross.sync.exception;
 
+@SuppressWarnings("unused")
 public class SSHProviderException extends ProviderException {
     public SSHProviderException(String message) {
         super(message);

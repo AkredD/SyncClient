@@ -1,26 +1,14 @@
 package com.cross.sync.swing;
 
 interface MenuConstants {
-    final String providerText = "Provider";
-    final String sshProvider = "SSH provider";
-    final String localProvider = "Local provider";
+    String providerText = "Provider";
 
-    final String syncTransferJob = "Job";
+    String syncTransferJob = "Job";
 
-    final String jobActionOpen = "Open";
-    final String providerActionShow = "Show";
-    final String actionStart = "Start";
-    final String actionStop = "Stop";
-    final String actionAbort = "Abort";
+    String jobActionOpen = "Open";
+    String providerActionShow = "Show";
 
-    final String infoStatus = "Status";
-    final String infoRunning = "Running";
-    final String infoSize = "Size";
+    String helpHelpTopic = "Help Topic";
+    String helpAboutNotepad = "About JSync";
 
-    final String viewStatusBar = "Status Bar";
-
-    final String helpHelpTopic = "Help Topic";
-    final String helpAboutNotepad = "About JSync";
-
-    final String aboutText = "Your JSync";
 }

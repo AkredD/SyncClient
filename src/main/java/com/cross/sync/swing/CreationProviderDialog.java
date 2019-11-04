@@ -17,7 +17,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashSet;
 
-public class CreationProviderDialog extends JDialog {
+class CreationProviderDialog extends JDialog {
     private final JDialog parent;
     private JPanel contentPane;
     private JButton buttonOK;
@@ -37,8 +37,8 @@ public class CreationProviderDialog extends JDialog {
         $$$setupUI$$$();
     }
 
-    CreationProviderDialog(JDialog parent, Boolean modal) {
-        super(parent, modal);
+    CreationProviderDialog(JDialog parent) {
+        super(parent, true);
         setTitle("Provider creation");
         this.parent = parent;
         setContentPane(contentPane);
@@ -89,7 +89,7 @@ public class CreationProviderDialog extends JDialog {
         String host = hostField.getText();
         String user = loginField.getText();
         if (name == null || name.isBlank()) {
-            JDialog dialogError = new ExceptionDialog(this, true, "Please, fill name field");
+            JDialog dialogError = new ExceptionDialog(this, "Please, fill name field");
             dialogError.setVisible(true);
             return;
         }
@@ -99,7 +99,7 @@ public class CreationProviderDialog extends JDialog {
                 break;
             case "SSHProvider":
                 if (host == null || host.isBlank() || user == null || user.isBlank()) {
-                    JDialog dialogError = new ExceptionDialog(this, true, "Please, fill host,and user fields");
+                    JDialog dialogError = new ExceptionDialog(this, "Please, fill host,and user fields");
                     dialogError.setVisible(true);
                     return;
                 }
@@ -110,7 +110,7 @@ public class CreationProviderDialog extends JDialog {
                     break;
                 } catch (ProviderException e) {
                     Slf4fLogger.error(this, e.getMessage());
-                    JDialog dialogError = new ExceptionDialog(this, true, e.getMessage());
+                    JDialog dialogError = new ExceptionDialog(this, e.getMessage());
                     dialogError.setVisible(true);
                     return;
                 }
@@ -182,6 +182,7 @@ public class CreationProviderDialog extends JDialog {
     }
 
     /**
+     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;

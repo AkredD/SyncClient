@@ -32,7 +32,6 @@ class LocalProviderTest {
             provider.createFile(testPath);
             File testFile = new File(testPath);
             assertTrue(testFile.exists());
-            assertEquals("d41d8cd98f00b204e9800998ecf8427e", provider.getMD5FileHash(testPath));
             provider.deleteFile(testPath);
             assertFalse(testFile.exists());
         } catch (ProviderException e) {
@@ -49,7 +48,6 @@ class LocalProviderTest {
             File file = new File(testDistPath);
             FileOutputStream out = new FileOutputStream(file);
             out.write(provider.loadFile(testPath).readAllBytes());
-            assertEquals("af6c12415e94ed70e45dccd3aa4d2931", provider.getMD5FileHash(testDistPath));
             provider.deleteFile(testPath);
             provider.deleteFile(testDistPath);
             assertFalse(file.exists());
@@ -66,7 +64,6 @@ class LocalProviderTest {
             createTestFile();
             FileInputStream in = new FileInputStream(testPath);
             provider.uploadFile(testDistPath).write(in.readAllBytes());
-            assertEquals("af6c12415e94ed70e45dccd3aa4d2931", provider.getMD5FileHash(testDistPath));
             provider.deleteFile(testPath);
             provider.deleteFile(testDistPath);
         } catch (IOException | ProviderException e) {

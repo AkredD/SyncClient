@@ -10,7 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class HelpDialog extends JDialog {
+class HelpDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JTextArea textArea1;
@@ -22,8 +22,8 @@ public class HelpDialog extends JDialog {
         $$$setupUI$$$();
     }
 
-    HelpDialog(JFrame parent, Boolean modal) {
-        super(parent, modal);
+    HelpDialog(JFrame parent) {
+        super(parent, true);
         setContentPane(contentPane);
         setModal(true);
         setSize(350, 250);
@@ -89,9 +89,10 @@ public class HelpDialog extends JDialog {
     }
 
     /**
-     *
+     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

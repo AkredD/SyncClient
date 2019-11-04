@@ -1,6 +1,7 @@
 package com.cross.sync.exception;
 
-public class TransferException extends Exception {
+@SuppressWarnings("unused")
+class TransferException extends Exception {
     public TransferException(String message) {
         super(message);
     }
@@ -18,7 +19,7 @@ public class TransferException extends Exception {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    public enum Message {
+    private enum Message {
 
     }
 }

@@ -133,6 +133,7 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
     }
 
     /**
+     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
@@ -145,21 +146,19 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         return temp;
     }
 
-    private JMenuItem createMenuItem(String s, int key, JMenu toMenu, ActionListener al) {
+    private void createMenuItem(String s, int key, JMenu toMenu, ActionListener al) {
         JMenuItem temp = new JMenuItem(s, key);
         temp.addActionListener(al);
         toMenu.add(temp);
 
-        return temp;
     }
 
-    private JMenuItem createMenuItem(String s, int key, JMenu toMenu, int aclKey, ActionListener al) {
+    private void createMenuItem(String s, int key, JMenu toMenu, int aclKey, ActionListener al) {
         JMenuItem temp = new JMenuItem(s, key);
         temp.addActionListener(al);
         temp.setAccelerator(KeyStroke.getKeyStroke(aclKey, ActionEvent.CTRL_MASK));
         toMenu.add(temp);
 
-        return temp;
     }
 
     private void createMenuBar(JFrame f) {
@@ -191,11 +190,11 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
                 break;
             }
             case jobActionOpen: {
-                dialog = new TransferDialog(this, true);
+                dialog = new TransferDialog(this);
                 break;
             }
             case helpAboutNotepad: {
-                dialog = new HelpDialog(this, true);
+                dialog = new HelpDialog(this);
             }
         }
         if (dialog != null) {

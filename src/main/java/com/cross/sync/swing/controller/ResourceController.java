@@ -9,9 +9,9 @@ import java.util.Set;
 
 public class ResourceController {
     private static ResourceController instance;
-    private Map<String, Transfer> transferMap;
-    private Map<String, LinuxProvider> linuxProviderMap;
-    private Map<String, Set<Transfer>> transfersByProvider;
+    private final Map<String, Transfer> transferMap;
+    private final Map<String, LinuxProvider> linuxProviderMap;
+    private final Map<String, Set<Transfer>> transfersByProvider;
 
     private ResourceController() {
         this.transferMap = new HashMap<>();

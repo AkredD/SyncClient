@@ -4,6 +4,7 @@ import com.cross.sync.exception.ProviderException;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,22 +30,21 @@ public interface LinuxProvider {
     OutputStream uploadFile(String path) throws ProviderException;
 
     /**
-     * Return file's md5 hash
+     * Return file's mtime
      * Throws an exception if there is connection problem
      *
      * @param path path to file
-     * @return String
+     * @return Long last modification time
      * @throws ProviderException provider exception
      */
-    String getMD5FileHash(String path) throws ProviderException;
+    Long getMTime(String path) throws ProviderException;
 
     /**
      * Check connection
      *
      * @return Boolean
-     * @throws ProviderException provider exception
      */
-    Boolean ping() throws ProviderException;
+    Boolean ping();
 
 
     /**
@@ -54,6 +54,14 @@ public interface LinuxProvider {
      * @throws ProviderException provider exception
      */
     void createFile(String path) throws ProviderException;
+
+    /**
+     * Create directory
+     *
+     * @param path path to directory
+     * @throws ProviderException provider exception
+     */
+    void createDirectory(String path) throws ProviderException;
 
     /**
      * Delete file
@@ -78,30 +86,55 @@ public interface LinuxProvider {
      *
      * @param path path to file
      * @return true if exist and false otherwise
-     * @throws ProviderException provider exception
      */
-    Boolean existFile(String path) throws ProviderException;
+    Boolean existFile(String path);
 
     /**
      * Check for file read privileges
      *
      * @param path path to file
      * @return true if can read false otherwise
-     * @throws ProviderException provider exception
      */
-    Boolean canRead(String path) throws ProviderException;
+    Boolean canRead(String path);
 
     /**
      * Check for file write privileges
      *
      * @param path path to file
      * @return true if can write and false otherwise
+     */
+    Boolean canWrite(String path);
+
+    /**
+     * Check file type
+     *
+     * @param path path to file
+     * @return true if directory, false otherwise
      * @throws ProviderException provider exception
      */
-    Boolean canWrite(String path) throws ProviderException;
+    Boolean isDirectory(String path) throws ProviderException;
 
+    /**
+     * Return list of files, that contains in path folder. Throw exception if it isn't a folder;
+     *
+     * @param path to folder
+     * @return list of files
+     * @throws ProviderException provider exception
+     */
+    List<String> getFileList(String path) throws ProviderException;
+
+
+    /**
+     * Get size of file
+     *
+     * @param path path to file or directory
+     * @return size
+     */
+    Long getSize(String path) throws ProviderException;
+
+    @SuppressWarnings("RegExpRedundantEscape")
     default Boolean validatePath(String path) {
-        Pattern pathTemplate = Pattern.compile("\\/([\\.A-z0-9-_+]+\\/)*[\\.A-z0-9-_+]+");
+        Pattern pathTemplate = Pattern.compile("\\/([\\.A-z0-9-_+]+\\/)*[\\.A-z0-9-_+]*");
         Matcher m = pathTemplate.matcher(path);
         return m.matches();
     }
