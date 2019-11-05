@@ -61,7 +61,7 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         updateTransferPane();
     }
 
-    void updateTransferPane() {
+    private void updateTransferPane() {
         if (updateThread != null) {
             updateThread.interrupt();
         }
@@ -69,13 +69,13 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         Set<Map.Entry<String, Transfer>> transferList = ResourceController.getInstance().getTransferMap().entrySet();
         rowPane.removeAll();
         scrollPane1.setViewportView(rowPane);
-        rowPane.setAutoscrolls(true);
-        rowPane.setLayout(new GridLayout(transferList.size(), 1));
+        rowPane.setLayout(new BoxLayout(rowPane, BoxLayout.Y_AXIS));
         transferList.forEach(transferEntry -> {
             TransformationRow row = new TransformationRow(this, transferEntry.getValue(), transferEntry.getKey());
             transformationRows.add(row);
             rowPane.add(row.getContent());
         });
+        rowPane.revalidate();
         updateThread = new Thread(() -> {
             while (true) {
                 transformationRows.forEach(TransformationRow::updateStatus);
@@ -148,6 +148,7 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
     }
 
     /**
+     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
@@ -177,14 +178,10 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
 
     private void createMenuBar(JFrame f) {
         JMenuBar mb = new JMenuBar();
-        JMenu jobMenu = createMenu(syncTransferJob, KeyEvent.VK_T, mb);
-        JMenu providerMenu = createMenu(providerText, KeyEvent.VK_P, mb);
+        JMenu fileMenu = createMenu(file, KeyEvent.VK_T, mb);
         JMenu helpMenu = createMenu(helpHelpTopic, KeyEvent.VK_H, mb);
 
-
-        createMenuItem(jobActionOpen, KeyEvent.VK_N, jobMenu, KeyEvent.VK_N, this);
-
-        createMenuItem(providerActionShow, KeyEvent.VK_S, providerMenu, KeyEvent.VK_P, this);
+        createMenuItem(settingsMenu, KeyEvent.VK_S, fileMenu, KeyEvent.VK_P, this);
 
         createMenuItem(helpAboutNotepad, KeyEvent.VK_H, helpMenu, this);
 
@@ -196,12 +193,8 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         String cmdText = actionEvent.getActionCommand();
         JDialog dialog = null;
         switch (cmdText) {
-            case providerActionShow: {
-                dialog = new ProviderDialog(this, true);
-                break;
-            }
-            case jobActionOpen: {
-                dialog = new TransferDialog(this);
+            case settingsMenu: {
+                dialog = new SettingsDialog(this, this::updateTransferPane);
                 break;
             }
             case helpAboutNotepad: {

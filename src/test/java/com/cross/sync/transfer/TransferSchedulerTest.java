@@ -25,9 +25,9 @@ class TransferSchedulerTest {
     @BeforeEach
     void setUp() {
         try {
-            remoteProvider = new SSHProvider("localhost", System.getProperty("user.name"));
+            remoteProvider = new SSHProvider("", "localhost", System.getProperty("user.name"));
             remoteProvider.open();
-            localProvider = new LocalProvider();
+            localProvider = new LocalProvider("");
         } catch (ProviderException e) {
             e.printStackTrace();
             fail();
@@ -53,8 +53,8 @@ class TransferSchedulerTest {
         try {
             localProvider.uploadFile(fromPathFirst).write(new byte[20000000]);
             localProvider.uploadFile(fromPathSecond).write(new byte[30000000]);
-            FullTempTransfer transferFirst = new FullTempTransfer(localProvider, fromPathFirst, remoteProvider, toPathFirst);
-            FullTempTransfer transferSecond = new FullTempTransfer(localProvider, fromPathSecond, remoteProvider, toPathSecond);
+            FullTempTransfer transferFirst = new FullTempTransfer("test1", localProvider, fromPathFirst, remoteProvider, toPathFirst);
+            FullTempTransfer transferSecond = new FullTempTransfer("test2", localProvider, fromPathSecond, remoteProvider, toPathSecond);
             TransferScheduler.getInstance().addForScheduling(transferFirst);
             TransferScheduler.getInstance().addForScheduling(transferSecond);
             Thread.sleep(15000);

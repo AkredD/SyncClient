@@ -16,7 +16,7 @@ class SSHProviderTest {
 
     @BeforeEach
     void setUp() {
-        provider = new SSHProvider("localhost", System.getProperty("user.name"));
+        provider = new SSHProvider("", "localhost", System.getProperty("user.name"));
         try {
             provider.open();
             provider.ping();

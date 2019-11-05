@@ -139,6 +139,12 @@ public interface Provider extends Closeable {
      */
     void open() throws ProviderException;
 
+
+    /**
+     * @return name of provider
+     */
+    String getName();
+
     @SuppressWarnings("RegExpRedundantEscape")
     default Boolean validatePath(String path) {
         Pattern pathTemplate = Pattern.compile("\\/([\\.A-z0-9-_+]+\\/)*[\\.A-z0-9-_+]*");

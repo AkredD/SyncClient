@@ -6,9 +6,9 @@
       <xy x="20" y="317" width="500" height="103"/>
     </constraints>
     <properties>
-      <maximumSize width="314" height="70"/>
+      <maximumSize width="1800" height="70"/>
       <minimumSize width="410" height="-1"/>
-      <preferredSize width="410" height="50"/>
+      <preferredSize width="-1" height="50"/>
     </properties>
     <border type="none"/>
     <children>

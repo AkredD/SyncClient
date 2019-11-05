@@ -21,27 +21,38 @@ import java.util.stream.Collectors;
 
 public class SSHProvider implements Provider {
     private final static Set<OpenMode> READ_MODE;
-    private final static Set<OpenMode> WRITE_MODE;
-    private final static Set<OpenMode> CREATE_MODE;
+    private final static Set<OpenMode> WRITE_CREATE_MODE;
 
     static {
         READ_MODE = new HashSet<>();
-        WRITE_MODE = new HashSet<>();
-        CREATE_MODE = new HashSet<>();
+        WRITE_CREATE_MODE = new HashSet<>();
         READ_MODE.add(OpenMode.READ);
-        WRITE_MODE.add(OpenMode.WRITE);
-        CREATE_MODE.add(OpenMode.CREAT);
-        CREATE_MODE.add(OpenMode.WRITE);
+        WRITE_CREATE_MODE.add(OpenMode.CREAT);
+        WRITE_CREATE_MODE.add(OpenMode.WRITE);
     }
 
+    private final String name;
     private String host;
     private String publicKey;
     private SSHClient ssh;
     private SFTPClient sftpClient;
 
-    public SSHProvider(String host, String publicKey) {
+    public SSHProvider(String providerName, String host, String publicKey) {
         this.host = host;
         this.publicKey = publicKey;
+        this.name = providerName;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
     }
 
     @Override
@@ -60,7 +71,7 @@ public class SSHProvider implements Provider {
         RemoteFile rf;
         try {
             sftpClient.getFileTransfer().setPreserveAttributes(false);
-            rf = sftpClient.open(path, WRITE_MODE);
+            rf = sftpClient.open(path, WRITE_CREATE_MODE);
             return new RemoteOutputStream(rf);
         } catch (IOException e) {
             throw new SSHProviderException(e);
@@ -79,7 +90,7 @@ public class SSHProvider implements Provider {
     @Override
     public void createFile(String path) throws SSHProviderException {
         try {
-            sftpClient.open(path, CREATE_MODE).close();
+            sftpClient.open(path, WRITE_CREATE_MODE).close();
         } catch (IOException e) {
             throw new SSHProviderException(e);
         }

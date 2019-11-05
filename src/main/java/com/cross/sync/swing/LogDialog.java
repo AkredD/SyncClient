@@ -23,6 +23,8 @@ class LogDialog extends JDialog {
     LogDialog(JFrame parent, String log) {
         super(parent, true);
         textArea.setText(log);
+        setLocationRelativeTo(parent);
+        setTitle("Transfer log");
         setMinimumSize(new Dimension(800, 350));
         setContentPane(contentPane);
         setModal(true);

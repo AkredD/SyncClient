@@ -22,8 +22,8 @@ class FullTempTransferTest {
 
     @BeforeEach
     void setUp() {
-        remoteProvider = new SSHProvider("localhost", System.getProperty("user.name"));
-        localProvider = new LocalProvider();
+        remoteProvider = new SSHProvider("", "localhost", System.getProperty("user.name"));
+        localProvider = new LocalProvider("");
         try {
             remoteProvider.open();
             remoteProvider.ping();
@@ -54,7 +54,7 @@ class FullTempTransferTest {
             byte[] bytes = {1, 3, 1, 6, 7, 1};
             out.write(bytes);
             out.close();
-            Runnable transferJob = new FullTempTransfer(localProvider, fromPath, remoteProvider, toPath);
+            Runnable transferJob = new FullTempTransfer("test", localProvider, fromPath, remoteProvider, toPath);
             Thread thread = new Thread(transferJob);
             thread.start();
             thread.join();

@@ -10,21 +10,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class FullTempTransfer extends Transfer {
-    private final Provider readProvider;
-    private final Provider writeProvider;
-    private final String readPath;
-    private final String writePath;
     private final Map<String, Long> lastModifiedHistory;
     private long allSize;
     private long transferedSize;
 
-    public FullTempTransfer(Provider readProvider, String readPath, Provider writeProvider, String writePath) {
-        this.readProvider = readProvider;
-        this.writeProvider = writeProvider;
-        this.readPath = readPath;
-        this.writePath = writePath;
+    public FullTempTransfer(String name, Provider readProvider, String readPath, Provider writeProvider, String writePath) {
+        super(readProvider, writeProvider, readPath, writePath);
         this.lastModifiedHistory = new HashMap<>();
         super.log = new StringBuilder();
+        setName(name);
     }
 
     @Override

@@ -13,6 +13,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LocalProvider implements Provider {
+    private final String name;
+
+    public LocalProvider(String providerName) {
+        this.name = providerName;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 
     @Override
     public InputStream loadFile(String path) throws LocalProviderException {
@@ -34,6 +44,9 @@ public class LocalProvider implements Provider {
     public OutputStream uploadFile(String path) throws LocalProviderException {
         try {
             File file = new File(path);
+            if (!file.exists() && !file.createNewFile()) {
+                throw new LocalProviderException(String.format("Can't write file: %s", path));
+            }
             if (!file.canWrite()) {
                 throw new LocalProviderException(String.format("Can't write file: %s", path));
             }

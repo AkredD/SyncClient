@@ -20,7 +20,7 @@ class LocalProviderTest {
 
     @BeforeEach
     void setUp() {
-        provider = new LocalProvider();
+        provider = new LocalProvider("");
         testPath = System.getProperty("user.home") + File.separator + "testFile.temp";
         testDistPath = System.getProperty("user.home") + File.separator + "testDistTest.temp";
     }

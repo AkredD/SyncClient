@@ -91,9 +91,9 @@ class TransformationRow extends JPanel {
     private void $$$setupUI$$$() {
         transformRow = new JPanel();
         transformRow.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), -1, -1));
-        transformRow.setMaximumSize(new Dimension(314, 70));
+        transformRow.setMaximumSize(new Dimension(1800, 70));
         transformRow.setMinimumSize(new Dimension(410, -1));
-        transformRow.setPreferredSize(new Dimension(410, 50));
+        transformRow.setPreferredSize(new Dimension(-1, 50));
         Status = new JLabel();
         Status.setText("Label");
         transformRow.add(Status, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -111,6 +111,7 @@ class TransformationRow extends JPanel {
     }
 
     /**
+     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return transformRow;

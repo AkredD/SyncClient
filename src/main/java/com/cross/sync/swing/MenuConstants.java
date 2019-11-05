@@ -1,12 +1,9 @@
 package com.cross.sync.swing;
 
 interface MenuConstants {
-    String providerText = "Provider";
+    String file = "File";
 
-    String syncTransferJob = "Job";
-
-    String jobActionOpen = "Open";
-    String providerActionShow = "Show";
+    String settingsMenu = "Settings";
 
     String helpHelpTopic = "Help Topic";
     String helpAboutNotepad = "About JSync";
