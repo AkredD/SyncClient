@@ -1,6 +1,6 @@
 package com.cross.sync.swing.controller;
 
-import com.cross.sync.provider.LinuxProvider;
+import com.cross.sync.provider.Provider;
 import com.cross.sync.transfer.Transfer;
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Set;
 public class ResourceController {
     private static ResourceController instance;
     private final Map<String, Transfer> transferMap;
-    private final Map<String, LinuxProvider> linuxProviderMap;
+    private final Map<String, Provider> linuxProviderMap;
     private final Map<String, Set<Transfer>> transfersByProvider;
 
     private ResourceController() {
@@ -34,7 +34,7 @@ public class ResourceController {
         return transferMap;
     }
 
-    public Map<String, LinuxProvider> getLinuxProviderMap() {
+    public Map<String, Provider> getLinuxProviderMap() {
         return linuxProviderMap;
     }
 

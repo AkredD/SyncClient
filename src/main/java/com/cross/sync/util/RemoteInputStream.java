@@ -62,7 +62,10 @@ public class RemoteInputStream extends ByteArrayInputStream {
     public synchronized byte[] readAllBytes() {
         try {
             byte[] b = new byte[(int) rf.fetchAttributes().getSize()];
-            read(b, 0, (int) rf.fetchAttributes().getSize());
+            int len = read(b, 0, (int) rf.fetchAttributes().getSize());
+            if (len != (int) rf.fetchAttributes().getSize()) {
+                Slf4fLogger.error(this, String.format("Problem, can't read all bytes. Expected %d, found %d", rf.fetchAttributes().getSize(), len));
+            }
             return b;
         } catch (IOException e) {
             throw new RuntimeException(e);

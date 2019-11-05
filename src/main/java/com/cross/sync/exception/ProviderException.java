@@ -1,5 +1,6 @@
 package com.cross.sync.exception;
 
+@SuppressWarnings({"WeakerAccess", "RedundantSuppression"})
 public class ProviderException extends Exception {
     ProviderException(String message) {
         super(message);

@@ -2,7 +2,7 @@ package com.cross.sync.provider.impl;
 
 import com.cross.sync.exception.LocalProviderException;
 import com.cross.sync.exception.ProviderException;
-import com.cross.sync.provider.LinuxProvider;
+import com.cross.sync.provider.Provider;
 import com.cross.sync.util.Slf4fLogger;
 
 import java.io.*;
@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LocalProvider implements LinuxProvider {
+public class LocalProvider implements Provider {
 
     @Override
     public InputStream loadFile(String path) throws LocalProviderException {
@@ -149,5 +149,15 @@ public class LocalProvider implements LinuxProvider {
     public Long getSize(String path) {
         File file = new File(path);
         return file.length();
+    }
+
+    @Override
+    public void open() {
+
+    }
+
+    @Override
+    public void close() {
+
     }
 }

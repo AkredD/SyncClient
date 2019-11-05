@@ -1,27 +1,24 @@
 package com.cross.sync.transfer.impl;
 
 import com.cross.sync.exception.ProviderException;
-import com.cross.sync.provider.LinuxProvider;
+import com.cross.sync.provider.Provider;
 import com.cross.sync.transfer.Transfer;
 import com.cross.sync.util.Slf4fLogger;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class FullTempTransfer extends Transfer {
-    private final LinuxProvider readProvider;
-    private final LinuxProvider writeProvider;
+    private final Provider readProvider;
+    private final Provider writeProvider;
     private final String readPath;
     private final String writePath;
     private final Map<String, Long> lastModifiedHistory;
     private long allSize;
     private long transferedSize;
 
-    public FullTempTransfer(LinuxProvider readProvider, String readPath, LinuxProvider writeProvider, String writePath) {
+    public FullTempTransfer(Provider readProvider, String readPath, Provider writeProvider, String writePath) {
         this.readProvider = readProvider;
         this.writeProvider = writeProvider;
         this.readPath = readPath;
@@ -44,10 +41,11 @@ public class FullTempTransfer extends Transfer {
                 transferFile("", foundFiles);
             }
             if (isInterrupted()) {
-                String message = String.format("Synchronizing file from %s by path '%s' with %s '%s' was interrupted. Skipped deleting step."
+                String message = String.format("%s: Synchronizing file from %s by path '%s' with %s '%s' was interrupted. Skipped deleting step."
+                        , new Date()
                         , readProvider.getClass().getSimpleName(), readPath + readPath
                         , writeProvider.getClass().getSimpleName(), writePath + writePath);
-                log.append(message);
+                log.append(message).append("\n");
                 Slf4fLogger.info(this, message);
                 return;
             }
@@ -57,18 +55,21 @@ public class FullTempTransfer extends Transfer {
                     .peek(deletedFile -> {
                         try {
                             writeProvider.deleteFile(String.format("%s/%s", writePath, deletedFile));
-                            var message = String.format("Found deleted file '%s'. Synchronized", String.format("%s/%s", writePath, deletedFile));
-                            log.append(message);
+                            var message = String.format("%s: Found deleted file '%s/%s'. Synchronized", new Date(), writePath, deletedFile);
+                            log.append(message).append("\n");
                             Slf4fLogger.info(this, message);
                         } catch (ProviderException e) {
-                            e.printStackTrace();
+                            Slf4fLogger.error(this, e.getMessage());
                         }
                     })
                     .collect(Collectors.toList());
             deletedFiles.forEach(lastModifiedHistory::remove);
             status = 100;
+            interrupted = false;
         } catch (ProviderException | IOException e) {
             Slf4fLogger.error(this, e.getMessage());
+            interrupted = true;
+            log.append(String.format("%s: Something go wrong: %s\n", new Date(), e.getMessage()));
         }
     }
 
@@ -105,10 +106,11 @@ public class FullTempTransfer extends Transfer {
                 transferFile(String.format("%s/%s", additionalDirectoryPath, pathToFile), foundFiles);
             }
             if (isInterrupted()) {
-                String message = String.format("Synchronizing file from %s by path '%s' with %s '%s' was interrupted"
+                String message = String.format("%s: Synchronizing file from %s by path '%s' with %s '%s' was interrupted"
+                        , new Date()
                         , readProvider.getClass().getSimpleName(), readPath + contextReadDirPath
                         , writeProvider.getClass().getSimpleName(), writePath + additionalDirectoryPath);
-                log.append(message);
+                log.append(message).append("\n");
                 Slf4fLogger.info(this, message);
                 return;
             }
@@ -132,20 +134,22 @@ public class FullTempTransfer extends Transfer {
             super.transferTo();
             if (isInterrupted()) {
                 writeProvider.deleteFile(writeTempPath);
-                String message = String.format("Synchronizing file from %s by path '%s' with %s '%s' was interrupted"
+                String message = String.format("%s: Synchronizing file from %s by path '%s' with %s '%s' was interrupted"
+                        , new Date()
                         , readProvider.getClass().getSimpleName(), contextReadPath
                         , writeProvider.getClass().getSimpleName(), contextWritePath);
-                log.append(message);
+                log.append(message).append("\n");
                 Slf4fLogger.info(this, message);
                 return;
             }
             source.close();
             destination.close();
             writeProvider.moveFile(writeTempPath, contextWritePath);
-            String message = String.format("File from %s by path '%s' synchronized with %s '%s'"
+            String message = String.format("%s: File from %s by path '%s' synchronized with %s '%s'"
+                    , new Date()
                     , readProvider.getClass().getSimpleName(), contextReadPath
                     , writeProvider.getClass().getSimpleName(), contextWritePath);
-            log.append(message);
+            log.append(message).append("\n");
             Slf4fLogger.info(this, message);
             lastModifiedHistory.put(additionFilePath, readProvider.getMTime(contextReadPath));
         }

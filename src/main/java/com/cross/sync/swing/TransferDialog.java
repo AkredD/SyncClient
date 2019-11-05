@@ -17,7 +17,7 @@ class TransferDialog extends JDialog {
     private final DefaultListModel<String> jobsModel = new DefaultListModel<>();
     private JPanel contentPane;
     private JButton deleteButton;
-    private JButton buttonCancel;
+    private JButton buttonClose;
     private JButton addButton;
     private JList<String> jobsList;
 
@@ -34,10 +34,11 @@ class TransferDialog extends JDialog {
         this.parent = parent;
         setContentPane(contentPane);
         setSize(400, 325);
-        getRootPane().setDefaultButton(deleteButton);
+        getRootPane().setDefaultButton(buttonClose);
 
         addButton.addActionListener(e -> {
             JDialog dialog = new CreationJobDialog(this, true);
+            dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
         });
 
@@ -50,7 +51,7 @@ class TransferDialog extends JDialog {
             }
         });
 
-        buttonCancel.addActionListener(e -> onCancel());
+        buttonClose.addActionListener(e -> onCancel());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -68,22 +69,17 @@ class TransferDialog extends JDialog {
         updateJobList();
     }
 
+    private void onCancel() {
+        // add your code here if necessary
+        dispose();
+    }
+
     void updateJobList() {
         jobsModel.clear();
         jobsModel.addAll(ResourceController.getInstance().getTransferMap().keySet());
         if (parent instanceof JSync) {
             ((JSync) parent).updateTransferPane();
         }
-    }
-
-    private void onOK() {
-        // add your code here
-        dispose();
-    }
-
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
     }
 
     /**
@@ -107,9 +103,9 @@ class TransferDialog extends JDialog {
         deleteButton = new JButton();
         deleteButton.setText("Delete");
         panel2.add(deleteButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        buttonCancel = new JButton();
-        buttonCancel.setText("Cancel");
-        panel2.add(buttonCancel, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        buttonClose = new JButton();
+        buttonClose.setText("Close");
+        panel2.add(buttonClose, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         addButton = new JButton();
         addButton.setText("Add");
         panel2.add(addButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -123,7 +119,6 @@ class TransferDialog extends JDialog {
     }
 
     /**
-     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;

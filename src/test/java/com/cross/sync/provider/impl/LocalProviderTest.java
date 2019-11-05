@@ -1,7 +1,7 @@
 package com.cross.sync.provider.impl;
 
 import com.cross.sync.exception.ProviderException;
-import com.cross.sync.provider.LinuxProvider;
+import com.cross.sync.provider.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LocalProviderTest {
-    private LinuxProvider provider;
+    private Provider provider;
     private String testPath;
     private String testDistPath;
 

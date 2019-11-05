@@ -32,7 +32,7 @@ public class TransferScheduler {
 
     public void addForScheduling(Transfer transfer) {
         if (!runningTransfers.containsKey(transfer)) {
-            long TIMER_PERIOD = 60000L;
+            long TIMER_PERIOD = 10000L;
             ScheduledFuture scheduledFuture = executorService.scheduleWithFixedDelay(transfer, 0, TIMER_PERIOD, TimeUnit.MILLISECONDS);
             runningTransfers.put(transfer, scheduledFuture);
         }
@@ -51,4 +51,7 @@ public class TransferScheduler {
     }
 
 
+    public void exit() {
+        executorService.shutdown();
+    }
 }

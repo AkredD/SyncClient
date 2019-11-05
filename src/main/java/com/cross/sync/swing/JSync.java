@@ -2,6 +2,8 @@ package com.cross.sync.swing;
 
 import com.cross.sync.swing.controller.ResourceController;
 import com.cross.sync.transfer.Transfer;
+import com.cross.sync.transfer.TransferScheduler;
+import com.cross.sync.util.Slf4fLogger;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -9,14 +11,15 @@ import com.intellij.uiDesigner.core.Spacer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings({"SameParameterValue", "RedundantSuppression"})
 public class JSync extends JFrame implements MenuConstants, ActionListener {
     private JPanel contentPane;
-    private JButton buttonOK;
     private JButton buttonCancel;
     private JPanel rowPane;
     private JScrollPane scrollPane1;
@@ -34,7 +37,6 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         setTitle("JSync");
         transformationRows = new ArrayList<>();
         setContentPane(contentPane);
-        getRootPane().setDefaultButton(buttonOK);
 
         buttonCancel.addActionListener(e -> onCancel());
 
@@ -52,18 +54,11 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (updateThread != null) {
-                    updateThread.interrupt();
-                }
+                onExitDaemons();
             }
         });
         createMenuBar(this);
         updateTransferPane();
-    }
-
-    private void onOK() {
-        // add your code here
-        dispose();
     }
 
     void updateTransferPane() {
@@ -73,12 +68,11 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         transformationRows.clear();
         Set<Map.Entry<String, Transfer>> transferList = ResourceController.getInstance().getTransferMap().entrySet();
         rowPane.removeAll();
-        rowPane = new JPanel();
-        rowPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         scrollPane1.setViewportView(rowPane);
+        rowPane.setAutoscrolls(true);
         rowPane.setLayout(new GridLayout(transferList.size(), 1));
         transferList.forEach(transferEntry -> {
-            TransformationRow row = new TransformationRow(transferEntry.getValue(), transferEntry.getKey());
+            TransformationRow row = new TransformationRow(this, transferEntry.getValue(), transferEntry.getKey());
             transformationRows.add(row);
             rowPane.add(row.getContent());
         });
@@ -92,11 +86,32 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
                 }
             }
         });
+        rowPane.updateUI();
+        scrollPane1.updateUI();
         updateThread.start();
     }
 
+    private void onExitDaemons() {
+        if (updateThread != null) {
+            updateThread.interrupt();
+        }
+        TransferScheduler.getInstance().exit();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ResourceController.getInstance().getLinuxProviderMap().forEach((key, value) -> {
+            try {
+                value.close();
+            } catch (IOException e) {
+                Slf4fLogger.error(this, "Can't close provider " + key);
+            }
+        });
+    }
+
     private void onCancel() {
-        // add your code here if necessary
+        onExitDaemons();
         dispose();
     }
 
@@ -110,7 +125,7 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
     private void $$$setupUI$$$() {
         contentPane = new JPanel();
         contentPane.setLayout(new GridLayoutManager(2, 1, new Insets(10, 10, 10, 10), -1, -1));
-        contentPane.setPreferredSize(new Dimension(400, 350));
+        contentPane.setPreferredSize(new Dimension(600, 450));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
@@ -128,12 +143,11 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         scrollPane1 = new JScrollPane();
         panel3.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         rowPane = new JPanel();
-        rowPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        rowPane.setLayout(new GridBagLayout());
         scrollPane1.setViewportView(rowPane);
     }
 
     /**
-     * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
@@ -156,15 +170,13 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
     private void createMenuItem(String s, int key, JMenu toMenu, int aclKey, ActionListener al) {
         JMenuItem temp = new JMenuItem(s, key);
         temp.addActionListener(al);
-        temp.setAccelerator(KeyStroke.getKeyStroke(aclKey, ActionEvent.CTRL_MASK));
+        temp.setAccelerator(KeyStroke.getKeyStroke(aclKey, InputEvent.CTRL_DOWN_MASK));
         toMenu.add(temp);
 
     }
 
     private void createMenuBar(JFrame f) {
         JMenuBar mb = new JMenuBar();
-        JMenuItem temp;
-
         JMenu jobMenu = createMenu(syncTransferJob, KeyEvent.VK_T, mb);
         JMenu providerMenu = createMenu(providerText, KeyEvent.VK_P, mb);
         JMenu helpMenu = createMenu(helpHelpTopic, KeyEvent.VK_H, mb);
@@ -186,7 +198,6 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         switch (cmdText) {
             case providerActionShow: {
                 dialog = new ProviderDialog(this, true);
-                dialog.setVisible(true);
                 break;
             }
             case jobActionOpen: {
@@ -198,6 +209,7 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
             }
         }
         if (dialog != null) {
+            dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
         }
     }

@@ -12,14 +12,13 @@ public abstract class Transfer extends TimerTask {
     protected OutputStream destination;
     protected volatile StringBuilder log;
     protected volatile Integer status = 0;
+    protected volatile boolean interrupted;
     private volatile boolean run = false;
-    private volatile boolean interrupted;
 
     public void run() {
         run = true;
         interrupted = false;
         transferData();
-        interrupted = false;
         run = false;
     }
 
@@ -58,7 +57,7 @@ public abstract class Transfer extends TimerTask {
         this.interrupted = true;
     }
 
-    protected boolean isInterrupted() {
+    public boolean isInterrupted() {
         return interrupted;
     }
 }

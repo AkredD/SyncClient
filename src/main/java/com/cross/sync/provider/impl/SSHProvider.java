@@ -2,7 +2,7 @@ package com.cross.sync.provider.impl;
 
 import com.cross.sync.exception.ProviderException;
 import com.cross.sync.exception.SSHProviderException;
-import com.cross.sync.provider.LinuxProvider;
+import com.cross.sync.provider.Provider;
 import com.cross.sync.util.RemoteInputStream;
 import com.cross.sync.util.RemoteOutputStream;
 import net.schmizz.sshj.SSHClient;
@@ -11,7 +11,6 @@ import net.schmizz.sshj.sftp.*;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.xfer.FilePermission;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SSHProvider implements Closeable, LinuxProvider {
+public class SSHProvider implements Provider {
     private final static Set<OpenMode> READ_MODE;
     private final static Set<OpenMode> WRITE_MODE;
     private final static Set<OpenMode> CREATE_MODE;
@@ -107,13 +106,11 @@ public class SSHProvider implements Closeable, LinuxProvider {
     }
 
     // TODO mv ???
+    @SuppressWarnings("unused")
     @Override
     public void moveFile(String from, String to) throws ProviderException {
         try (Session session = ssh.startSession()) {
-            final Session.Command cmd = session.exec("mv " + from + " " + to);
-            if (cmd.getExitStatus() == 1) {
-                throw new SSHProviderException("Can't move file from '%s' to '%s'");
-            }
+            final Session.Command cmd = session.exec(String.format("mv \"%s\" \"%s\"", from, to));
         } catch (IOException e) {
             throw new SSHProviderException(e);
         }
@@ -130,6 +127,7 @@ public class SSHProvider implements Closeable, LinuxProvider {
         return true;
     }
 
+    @Override
     public void open() throws ProviderException {
         try {
             this.ssh = new SSHClient();

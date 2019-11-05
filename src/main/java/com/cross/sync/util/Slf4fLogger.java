@@ -3,6 +3,7 @@ package com.cross.sync.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("unused")
 public class Slf4fLogger {
     public static void trace(Object object, String message, Object... objects) {
         Logger logger = LoggerFactory.getLogger(object.getClass());

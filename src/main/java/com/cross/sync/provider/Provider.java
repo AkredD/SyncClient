@@ -2,13 +2,14 @@ package com.cross.sync.provider;
 
 import com.cross.sync.exception.ProviderException;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public interface LinuxProvider {
+public interface Provider extends Closeable {
     /**
      * Returns an input stream representing the requested document.
      * Throws an exception if there is no file or connection problem
@@ -44,6 +45,7 @@ public interface LinuxProvider {
      *
      * @return Boolean
      */
+    @SuppressWarnings("UnusedReturnValue")
     Boolean ping();
 
 
@@ -131,6 +133,11 @@ public interface LinuxProvider {
      * @return size
      */
     Long getSize(String path) throws ProviderException;
+
+    /**
+     * Try to connect with provider
+     */
+    void open() throws ProviderException;
 
     @SuppressWarnings("RegExpRedundantEscape")
     default Boolean validatePath(String path) {

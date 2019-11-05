@@ -1,6 +1,6 @@
 package com.cross.sync.swing;
 
-import com.cross.sync.provider.LinuxProvider;
+import com.cross.sync.provider.Provider;
 import com.cross.sync.provider.impl.SSHProvider;
 import com.cross.sync.swing.controller.ResourceController;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -33,7 +33,7 @@ public class ProviderDialog extends JDialog {
         getRootPane().setDefaultButton(Cancel);
         deleteButton.addActionListener(e -> {
             if (selectedProviderIndex != -1) {
-                LinuxProvider provider = ResourceController.getInstance().getLinuxProviderMap().remove(providersModel.get(selectedProviderIndex));
+                Provider provider = ResourceController.getInstance().getLinuxProviderMap().remove(providersModel.get(selectedProviderIndex));
                 if (provider instanceof SSHProvider) {
                     try {
                         ((SSHProvider) provider).close();
@@ -50,6 +50,7 @@ public class ProviderDialog extends JDialog {
 
         Add.addActionListener(e -> {
             JDialog dialog = new CreationProviderDialog(this);
+            dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
         });
         // call onCancel() when cross is clicked
