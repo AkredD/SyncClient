@@ -7,6 +7,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * Output stream using for work with sshj RemoteFile
+ */
 public class RemoteOutputStream extends ByteArrayOutputStream implements Closeable {
     private static final int DEFAULT_BUFFER_SIZE = 8192;
     private final RemoteFile rf;

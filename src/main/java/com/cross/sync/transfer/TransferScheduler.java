@@ -30,17 +30,18 @@ public class TransferScheduler {
         return instance;
     }
 
-    public void addForScheduling(Transfer transfer) {
+    public synchronized void addForScheduling(Transfer transfer) {
         if (!runningTransfers.containsKey(transfer)) {
-            long TIMER_PERIOD = 10000L;
+            long TIMER_PERIOD = 60000L;
             ScheduledFuture scheduledFuture = executorService.scheduleWithFixedDelay(transfer, 0, TIMER_PERIOD, TimeUnit.MILLISECONDS);
             runningTransfers.put(transfer, scheduledFuture);
         }
     }
 
-    public void deleteFromScheduling(Transfer transfer) {
+    public synchronized void deleteFromScheduling(Transfer transfer) {
         if (runningTransfers.containsKey(transfer)) {
             transfer.interrupt();
+            transfer.status = 0;
             runningTransfers.get(transfer).cancel(false);
             runningTransfers.remove(transfer);
         }

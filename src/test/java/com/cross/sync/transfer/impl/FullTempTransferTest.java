@@ -37,12 +37,7 @@ class FullTempTransferTest {
 
     @AfterEach
     void tearDown() {
-        try {
-            remoteProvider.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail();
-        }
+        remoteProvider.close();
     }
 
     @Test
@@ -60,7 +55,7 @@ class FullTempTransferTest {
             thread.join();
             localProvider.deleteFile(fromPath);
             remoteProvider.deleteFile(toPath);
-        }catch (IOException | ProviderException | InterruptedException e){
+        } catch (IOException | ProviderException | InterruptedException e) {
             e.printStackTrace();
             fail();
         }

@@ -30,12 +30,7 @@ class SSHProviderTest {
 
     @AfterEach
     void tearDown() {
-        try {
-            provider.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail();
-        }
+        provider.close();
     }
 
     @Test

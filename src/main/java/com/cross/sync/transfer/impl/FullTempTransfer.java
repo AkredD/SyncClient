@@ -6,6 +6,8 @@ import com.cross.sync.transfer.Transfer;
 import com.cross.sync.util.Slf4fLogger;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,15 +119,11 @@ public class FullTempTransfer extends Transfer {
         String contextReadPath = readPath + additionFilePath;
         String contextWritePath = writePath + additionFilePath;
         foundFiles.add(additionFilePath);
-        transferedSize += readProvider.getSize(contextReadPath);
-        status = (int) ((transferedSize * 100L) / allSize);
         if (!lastModifiedHistory.containsKey(additionFilePath)
                 || !lastModifiedHistory.get(additionFilePath).equals(readProvider.getMTime(contextReadPath))) {
             String writeTempPath = contextWritePath + ".temp";
             writeProvider.createFile(writeTempPath);
-            source = readProvider.loadFile(contextReadPath);
-            destination = writeProvider.uploadFile(writeTempPath);
-            super.transferTo();
+            transferTo(readProvider.loadFile(contextReadPath), writeProvider.uploadFile(writeTempPath));
             if (isInterrupted()) {
                 writeProvider.deleteFile(writeTempPath);
                 String message = String.format("%s: Synchronizing file from %s by path '%s' with %s '%s' was interrupted"
@@ -136,8 +134,6 @@ public class FullTempTransfer extends Transfer {
                 Slf4fLogger.info(this, message);
                 return;
             }
-            source.close();
-            destination.close();
             writeProvider.moveFile(writeTempPath, contextWritePath);
             String message = String.format("%s: File from %s by path '%s' synchronized with %s '%s'"
                     , new Date()
@@ -146,7 +142,27 @@ public class FullTempTransfer extends Transfer {
             log.append(message).append("\n");
             Slf4fLogger.info(this, message);
             lastModifiedHistory.put(additionFilePath, readProvider.getMTime(contextReadPath));
+        } else {
+            transferedSize += readProvider.getSize(contextReadPath);
+            status = (int) ((transferedSize * 100L) / allSize);
         }
+    }
+
+    private void transferTo(InputStream source, OutputStream destination) throws IOException {
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = source.read(buffer)) != -1) {
+            transferedSize += len;
+            status = (int) ((transferedSize * 100L) / allSize);
+            destination.write(buffer, 0, len);
+            if (interrupted) {
+                source.close();
+                destination.close();
+                return;
+            }
+        }
+        source.close();
+        destination.close();
     }
 
 }

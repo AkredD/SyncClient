@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
 
+/**
+ * Input stream for work with sshj RemoteFile
+ */
 public class RemoteInputStream extends ByteArrayInputStream {
     private static final int DEFAULT_BUFFER_SIZE = 8192;
     private final RemoteFile rf;

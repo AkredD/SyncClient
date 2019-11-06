@@ -139,6 +139,12 @@ public interface Provider extends Closeable {
      */
     void open() throws ProviderException;
 
+    /**
+     * Return true if provider was closed or some problem happened
+     *
+     * @return provider status
+     */
+    boolean isClosed();
 
     /**
      * @return name of provider

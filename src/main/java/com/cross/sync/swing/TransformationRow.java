@@ -70,6 +70,7 @@ class TransformationRow extends JPanel {
     }
 
     private void updateStatusButton() {
+        statusButton.setEnabled(true);
         Status.setText(TransferScheduler.getInstance().isTransferScheduling(transfer)
                 ?
                 transfer.isRun()
@@ -79,6 +80,11 @@ class TransformationRow extends JPanel {
         statusButton.setText(TransferScheduler.getInstance().isTransferScheduling(transfer)
                 ? transfer.isInterrupted() ? "retry" : "stop"
                 : "start");
+        if (transfer.getReadProvider().isClosed() || transfer.getWriteProvider().isClosed()) {
+            Status.setText("stopped(provider closed)");
+            statusButton.setText("start");
+            statusButton.setEnabled(false);
+        }
     }
 
     /**

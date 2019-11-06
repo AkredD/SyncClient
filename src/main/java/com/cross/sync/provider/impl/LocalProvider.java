@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 public class LocalProvider implements Provider {
     private final String name;
+    private volatile boolean closed;
 
     public LocalProvider(String providerName) {
         this.name = providerName;
@@ -98,7 +99,7 @@ public class LocalProvider implements Provider {
     @Override
     public void moveFile(String from, String to) throws LocalProviderException {
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", "mv " + from + " " + to);
+        processBuilder.command("bash", "-c", String.format("mv \"%s\" \"%s\"", from, to));
         try {
             Process process = processBuilder.start();
             int exitVal = process.waitFor();
@@ -166,11 +167,16 @@ public class LocalProvider implements Provider {
 
     @Override
     public void open() {
+        closed = false;
+    }
 
+    @Override
+    public boolean isClosed() {
+        return closed;
     }
 
     @Override
     public void close() {
-
+        closed = true;
     }
 }

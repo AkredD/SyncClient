@@ -40,12 +40,7 @@ class TransferSchedulerTest {
 
     @AfterEach
     void tearDown() {
-        try {
-            remoteProvider.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail();
-        }
+        remoteProvider.close();
     }
 
     @Test

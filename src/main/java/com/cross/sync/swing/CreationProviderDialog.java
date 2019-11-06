@@ -41,10 +41,10 @@ class CreationProviderDialog extends JDialog {
         $$$setupUI$$$();
     }
 
-    CreationProviderDialog(JDialog parent, com.cross.sync.util.Action updateAction, Provider provider, String name) {
+    CreationProviderDialog(JDialog parent, com.cross.sync.util.Action updateAction, Provider provider) {
         super(parent, true);
         this.originProvider = provider;
-        this.originName = name;
+        this.originName = provider != null ? provider.getName() : null;
         this.updateAction = updateAction;
         setTitle("Provider creation");
         setContentPane(contentPane);
@@ -85,7 +85,7 @@ class CreationProviderDialog extends JDialog {
 
         if (provider != null) {
             buttonOK.setText("Recreate");
-            nameField.setText(name);
+            nameField.setText(originName);
             if (provider instanceof SSHProvider) {
                 hostField.setText(((SSHProvider) provider).getHost());
                 loginField.setText(((SSHProvider) provider).getPublicKey());
@@ -145,18 +145,18 @@ class CreationProviderDialog extends JDialog {
                     return;
                 }
                 provider = new SSHProvider(name, host, user);
-                try {
-                    provider.open();
-                    provider.ping();
-                    break;
-                } catch (ProviderException e) {
-                    Slf4fLogger.error(this, e.getMessage());
-                    JDialog dialogError = new ExceptionDialog(this, e.getMessage());
-                    dialogError.setVisible(true);
-                    return;
-                }
+                break;
             default:
                 return;
+        }
+        try {
+            provider.open();
+            provider.ping();
+        } catch (ProviderException e) {
+            Slf4fLogger.error(this, e.getMessage());
+            JDialog dialogError = new ExceptionDialog(this, e.getMessage());
+            dialogError.setVisible(true);
+            return;
         }
         if (originProvider != null) {
             ResourceController.getInstance().getTransfersByProvider().remove(originName).forEach(transfer -> {

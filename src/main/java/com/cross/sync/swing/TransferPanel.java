@@ -99,4 +99,5 @@ class TransferPanel {
     public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
+
 }

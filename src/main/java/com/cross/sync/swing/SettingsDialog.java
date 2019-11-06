@@ -99,12 +99,15 @@ class SettingsDialog extends JDialog {
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JSplitPane splitPane1 = new JSplitPane();
         panel3.add(splitPane1, BorderLayout.CENTER);
-        list1 = new JList();
-        list1.setPreferredSize(new Dimension(80, 0));
-        splitPane1.setLeftComponent(list1);
         contentSettingPane = new JPanel();
         contentSettingPane.setLayout(new BorderLayout(0, 0));
         splitPane1.setRightComponent(contentSettingPane);
+        final JScrollPane scrollPane1 = new JScrollPane();
+        scrollPane1.setPreferredSize(new Dimension(90, -1));
+        splitPane1.setLeftComponent(scrollPane1);
+        list1 = new JList();
+        list1.setPreferredSize(new Dimension(80, 0));
+        scrollPane1.setViewportView(list1);
     }
 
     /**

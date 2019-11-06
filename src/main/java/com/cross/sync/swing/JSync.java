@@ -61,36 +61,6 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
         updateTransferPane();
     }
 
-    private void updateTransferPane() {
-        if (updateThread != null) {
-            updateThread.interrupt();
-        }
-        transformationRows.clear();
-        Set<Map.Entry<String, Transfer>> transferList = ResourceController.getInstance().getTransferMap().entrySet();
-        rowPane.removeAll();
-        scrollPane1.setViewportView(rowPane);
-        rowPane.setLayout(new BoxLayout(rowPane, BoxLayout.Y_AXIS));
-        transferList.forEach(transferEntry -> {
-            TransformationRow row = new TransformationRow(this, transferEntry.getValue(), transferEntry.getKey());
-            transformationRows.add(row);
-            rowPane.add(row.getContent());
-        });
-        rowPane.revalidate();
-        updateThread = new Thread(() -> {
-            while (true) {
-                transformationRows.forEach(TransformationRow::updateStatus);
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
-        });
-        rowPane.updateUI();
-        scrollPane1.updateUI();
-        updateThread.start();
-    }
-
     private void onExitDaemons() {
         if (updateThread != null) {
             updateThread.interrupt();
@@ -113,6 +83,45 @@ public class JSync extends JFrame implements MenuConstants, ActionListener {
     private void onCancel() {
         onExitDaemons();
         dispose();
+    }
+
+    private void updateTransferPane() {
+        if (updateThread != null) {
+            updateThread.interrupt();
+        }
+        transformationRows.clear();
+        Set<Map.Entry<String, Transfer>> transferList = ResourceController.getInstance().getTransferMap().entrySet();
+        rowPane.removeAll();
+        scrollPane1.setViewportView(rowPane);
+        rowPane.setLayout(new BoxLayout(rowPane, BoxLayout.Y_AXIS));
+        transferList.forEach(transferEntry -> {
+            TransformationRow row = new TransformationRow(this, transferEntry.getValue(), transferEntry.getKey());
+            transformationRows.add(row);
+            rowPane.add(row.getContent());
+        });
+        rowPane.revalidate();
+        updateThread = new Thread(() -> {
+            while (true) {
+                transformationRows.forEach(TransformationRow::updateStatus);
+                ResourceController.getInstance().getLinuxProviderMap().values()
+                        .forEach(provider -> {
+                            if (!provider.isClosed()) {
+                                provider.ping();
+                            } else {
+                                ResourceController.getInstance().getTransfersByProvider().get(provider.getName())
+                                        .forEach(transfer -> TransferScheduler.getInstance().deleteFromScheduling(transfer));
+                            }
+                        });
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+        });
+        rowPane.updateUI();
+        scrollPane1.updateUI();
+        updateThread.start();
     }
 
     /**

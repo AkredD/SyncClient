@@ -27,7 +27,7 @@ class HelpDialog extends JDialog {
         super(parent, true);
         setContentPane(contentPane);
         setModal(true);
-        setSize(400, 250);
+        setSize(600, 250);
         setTitle("Help");
         textArea1.setEditable(false);
         textArea1.setText("This application is used" +

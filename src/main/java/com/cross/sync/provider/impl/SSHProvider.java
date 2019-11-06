@@ -5,6 +5,7 @@ import com.cross.sync.exception.SSHProviderException;
 import com.cross.sync.provider.Provider;
 import com.cross.sync.util.RemoteInputStream;
 import com.cross.sync.util.RemoteOutputStream;
+import com.cross.sync.util.Slf4fLogger;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.sftp.*;
@@ -32,6 +33,7 @@ public class SSHProvider implements Provider {
     }
 
     private final String name;
+    private volatile boolean closed = true;
     private String host;
     private String publicKey;
     private SSHClient ssh;
@@ -62,6 +64,7 @@ public class SSHProvider implements Provider {
             rf = sftpClient.open(path, READ_MODE);
             return new RemoteInputStream(rf);
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
     }
@@ -74,6 +77,7 @@ public class SSHProvider implements Provider {
             rf = sftpClient.open(path, WRITE_CREATE_MODE);
             return new RemoteOutputStream(rf);
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
     }
@@ -83,6 +87,7 @@ public class SSHProvider implements Provider {
         try {
             return sftpClient.lstat(path).getMtime();
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
     }
@@ -92,6 +97,7 @@ public class SSHProvider implements Provider {
         try {
             sftpClient.open(path, WRITE_CREATE_MODE).close();
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
 
@@ -102,6 +108,7 @@ public class SSHProvider implements Provider {
         try {
             sftpClient.mkdir(path);
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
     }
@@ -111,6 +118,7 @@ public class SSHProvider implements Provider {
         try {
             sftpClient.rm(path);
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
 
@@ -123,6 +131,7 @@ public class SSHProvider implements Provider {
         try (Session session = ssh.startSession()) {
             final Session.Command cmd = session.exec(String.format("mv \"%s\" \"%s\"", from, to));
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
     }
@@ -132,7 +141,8 @@ public class SSHProvider implements Provider {
     public Boolean ping() {
         try (Session session = ssh.startSession()) {
             final Session.Command cmd = session.exec("ping -c 1 google.com");
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
+            close();
             return false;
         }
         return true;
@@ -146,17 +156,36 @@ public class SSHProvider implements Provider {
             this.ssh.loadKnownHosts();
             this.ssh.connect(host);
             this.ssh.authPublickey(publicKey);
+            Thread.sleep(200);
             this.sftpClient = ssh.newSFTPClient();
-        } catch (IOException e) {
-            throw new SSHProviderException(String.format("Can't connect via ssh to %s with login %s", host, publicKey), e);
+        } catch (IOException | IllegalStateException | InterruptedException e) {
+            closed = true;
+            try {
+                ssh.close();
+            } catch (Exception ex) {
+                Slf4fLogger.error(this, ex.getMessage());
+            }
+            throw new SSHProviderException(String.format("Can't connect via ssh to %s with login %s \n Try later.", host, publicKey), e);
         }
+        closed = false;
     }
 
     @Override
-    public void close() throws IOException {
-        sftpClient.close();
-        ssh.disconnect();
+    public boolean isClosed() {
+        return closed;
     }
+
+    @Override
+    public void close() {
+        closed = true;
+        try {
+            sftpClient.close();
+            ssh.disconnect();
+        } catch (IOException | IllegalStateException e) {
+            Slf4fLogger.error(this, e.getMessage());
+        }
+    }
+
 
     @Override
     public Boolean existFile(String path) {
@@ -191,6 +220,7 @@ public class SSHProvider implements Provider {
         try {
             return sftpClient.lstat(path).getType().equals(FileMode.Type.DIRECTORY);
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
     }
@@ -203,6 +233,7 @@ public class SSHProvider implements Provider {
                     .map(RemoteResourceInfo::getName)
                     .collect(Collectors.toList());
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
     }
@@ -212,6 +243,7 @@ public class SSHProvider implements Provider {
         try {
             return sftpClient.lstat(path).getSize();
         } catch (IOException e) {
+            close();
             throw new SSHProviderException(e);
         }
     }
