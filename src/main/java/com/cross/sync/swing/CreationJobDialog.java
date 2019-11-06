@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"ALL", "RedundantSuppression"})
 public class CreationJobDialog extends JDialog {
@@ -76,7 +77,12 @@ public class CreationJobDialog extends JDialog {
 
     private void formTransferAttrPanel() {
         transferAttrPanel.setLayout(new GridLayout(5, 2, 0, 0));
-        Object[] providers = ResourceController.getInstance().getLinuxProviderMap().keySet().toArray();
+        Object[] providers = ResourceController.getInstance().getLinuxProviderMap().values()
+                .stream()
+                .filter(provider -> !provider.isClosed())
+                .map(provider -> provider.getName())
+                .collect(Collectors.toList())
+                .toArray();
         ComboBoxModel<Object> providersModelFrom = new DefaultComboBoxModel<>(providers);
         ComboBoxModel<Object> providersModelTo = new DefaultComboBoxModel<>(providers);
         providerFromBox = new JComboBox<>(providersModelFrom);
