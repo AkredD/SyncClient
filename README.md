@@ -11,8 +11,9 @@ After that, you can start it and watch progress from the main menu.
 ## Work cases
 
 ### Providers
+
    You can create local or ssh provider to read or write files for synchronization.
- If you want to user ssh provider, make sure the public key is in the destination server,
+ If you want to use ssh provider, make sure your public key is in the destination server,
  otherwise you couldn't connect.
 
 ### Transfers
@@ -25,7 +26,7 @@ After that, you can run it from the main menu.
   In the main menu you can see transfer info and control it.
 There are some transfers information statuses
  1. synchronizing - transfer is running
- 2. scheduling - waiting(1 minuite default)
+ 2. scheduling - waiting(1 minute default)
  3. stopped - transfer interrupted
  4. stopped(provider closed) - one of providers is disconnected and you need to connect it manually
 
